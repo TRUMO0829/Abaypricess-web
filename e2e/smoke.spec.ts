@@ -21,10 +21,10 @@ for (const route of routes) {
     await expect(page.locator("h1").first()).toBeVisible()
     await expect(page.locator("html")).toHaveAttribute("lang", "mn")
 
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-    )
-    expect(overflow).toBeLessThanOrEqual(0)
+    // isMobile үед layout viewport агуулгын өргөнд тэлдэг тул тохируулсан viewport-той харьцуулна
+    const viewportWidth = page.viewportSize()!.width
+    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth)
+    expect(scrollWidth).toBeLessThanOrEqual(viewportWidth)
     expect(errors).toEqual([])
   })
 }
