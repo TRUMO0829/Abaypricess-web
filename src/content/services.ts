@@ -343,3 +343,83 @@ export function getNextService(slug: ServiceSlug): Service | undefined {
   const current = getService(slug)
   return current && services.find((service) => service.order === current.order + 1)
 }
+
+/** Багцуудын хамгийн бага тодорхой үнэ. Бүх багц "Тохиролцоно" бол null. */
+export function getStartingPrice(service: Service): number | null {
+  const prices = service.packages
+    .map((pkg) => pkg.price)
+    .filter((price): price is number => price !== null)
+  return prices.length > 0 ? Math.min(...prices) : null
+}
+
+/** `/services` тойм хуудасны текст. */
+export const servicesPageContent = {
+  header: {
+    title: "Манай",
+    highlight: "үйлчилгээ",
+    description:
+      "Сургалт, лаборатори, шинэчлэл — байгууллагын хөгжлийн бүрэн мөчлөгийг алхам алхмаар хамтдаа туулна.",
+  },
+  flow: {
+    eyebrow: "Үйлчилгээний урсгал",
+    title: "Гурван алхам,",
+    highlight: "нэг зорилго",
+    description:
+      "Үйлчилгээ тус бүрийг дангаар нь авч болох ч дарааллаар нь авснаар мэдлэг, оношилгоо, хэрэгжилт нэг цогц болж, эцэст нь албан ёсны тайлангаар баталгаажна.",
+    startingFrom: "Эхлэх үнэ",
+    stepLabel: "Алхам",
+    reportEyebrow: "Үр дүн",
+    reportDescription:
+      "Алхам бүрийн дүгнэлт, шинжилгээ, зөвлөмжийг албан ёсны тайлангаар хүлээлгэн өгнө.",
+  },
+  faq: {
+    eyebrow: "Түгээмэл асуулт",
+    title: "Үйлчилгээний талаар",
+    highlight: "асуулт, хариулт",
+  },
+}
+
+/** `/services/[slug]` дэлгэрэнгүй хуудасны section-уудын текст. */
+export const serviceDetailContent = {
+  hero: {
+    benefitsTitle: "Таны авах үр өгөөж",
+    deliverableLabel: "Хүлээлгэн өгөх баримт",
+    flowLabel: "Үйлчилгээний урсгал",
+  },
+  sectionNav: [
+    { id: "process", label: "Процесс" },
+    { id: "programs", label: "Хөтөлбөр" },
+    { id: "pricing", label: "Үнийн санал" },
+    { id: "faq", label: "Асуулт, хариулт" },
+  ],
+  process: {
+    eyebrow: "Дэлгэрэнгүй процесс",
+    title: "Ажил хэрхэн",
+    highlight: "явагдах вэ",
+    description: "Алхам бүрийг сонгож, хийгдэх ажил, хугацаа, хүлээлгэн өгөх үр дүнтэй танилцана уу.",
+  },
+  programs: {
+    eyebrow: "Хөтөлбөр",
+    title: "Сургалтын",
+    highlight: "хөтөлбөрүүд",
+    description: "Доорх хөтөлбөрүүдийг танай байгууллагын хэрэгцээнд тохируулан өөрчилж болно.",
+  },
+  pricing: {
+    eyebrow: "Үнийн санал",
+    title: "Танд тохирох",
+    highlight: "багц",
+    description: "Багцаа сонгоод хүсэлт илгээхэд манай зөвлөх дэлгэрэнгүй үнийн саналыг танилцуулна.",
+    popularLabel: "Хамгийн их сонгогддог",
+    note: "Үнэ НӨАТ ороогүй, урьдчилсан суурь үнэ болно. Эцсийн үнийн санал нь байгууллагын хэмжээ, хамрах хүрээ, хугацаанаас хамаарна.",
+  },
+  faq: {
+    eyebrow: "Түгээмэл асуулт",
+    title: "Асуулт,",
+    highlight: "хариулт",
+  },
+  next: {
+    eyebrow: "Дараагийн алхам",
+    reportDescription:
+      "Үйлчилгээ бүрийн төгсгөлд дүгнэлт, шинжилгээ, зөвлөмжийг багтаасан албан ёсны тайлан хүлээлгэн өгнө.",
+  },
+}
