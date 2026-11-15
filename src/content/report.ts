@@ -1,4 +1,4 @@
-import type { ReportTemplate } from "@/types/content"
+import type { ReportTemplate, ServiceSlug } from "@/types/content"
 
 // Тайлангийн жишээ загвар — бодит харилцагчийн мэдээлэл биш
 const commonSections = {
@@ -106,3 +106,45 @@ export const reportTemplates: ReportTemplate[] = [
     ],
   },
 ]
+
+/** `/report` хуудасны текст. */
+export const reportPageContent = {
+  header: {
+    title: "Тайлангийн",
+    highlight: "загвар",
+    description:
+      "Үйлчилгээ бүрийн төгсгөлд хүлээлгэн өгөх албан ёсны тайлангийн бүтэцтэй танилцана уу. Доорх нь жишээ загвар бөгөөд бодит тайлан танай байгууллагын өгөгдлөөр бэлтгэгдэнэ.",
+  },
+  tabsLabel: "Тайлангийн загвар сонгох",
+  tabLabels: { training: "Сургалт", laboratory: "Лаборатори", update: "Шинэчлэл" } satisfies Record<
+    ServiceSlug,
+    string
+  >,
+  printLabel: "Хэвлэх / PDF болгох",
+  printHint: "Хэвлэх цонхонд «PDF болгож хадгалах»-ыг сонговол PDF файл үүснэ.",
+  paper: {
+    watermark: "ЖИШЭЭ",
+    clientLabel: "Харилцагч",
+    clientValue: "[Байгууллагын нэр]",
+    dateLabel: "Огноо",
+    dateValue: "20XX.XX.XX",
+    reportNoLabel: "Тайлангийн дугаар",
+    reportNoValue: "AP-20XX-000",
+    metricsTitle: "Гол үзүүлэлтүүд",
+    footer: "Энэхүү баримт нь жишээ загвар бөгөөд бодит харилцагчийн мэдээлэл агуулаагүй болно.",
+    page: "Хуудас 1",
+  },
+  aside: {
+    title: "Тайлан юу агуулдаг вэ",
+    items: [
+      { title: "Ерөнхий дүгнэлт", description: "Удирдлагад зориулсан нэг хуудасны товчлол." },
+      { title: "Тоон үзүүлэлт", description: "Өмнөх / дараах харьцуулалт, график, хүснэгт." },
+      { title: "Шинжилгээ", description: "Илэрсэн асуудал, шалтгаан, нөлөөлөл." },
+      { title: "Зөвлөмж ба дараагийн алхам", description: "Хариуцагч, хугацаатай хэрэгжүүлэх төлөвлөгөө." },
+    ],
+    ctaTitle: "Ийм тайлан авахыг хүсэж байна уу?",
+    ctaDescription: "Үйлчилгээгээ сонгоод хүсэлт илгээхэд манай зөвлөх тантай холбогдоно.",
+    ctaLabel: "Үйлчилгээ захиалах",
+    servicesLabel: "Үйлчилгээний дэлгэрэнгүй",
+  },
+}
