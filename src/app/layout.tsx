@@ -38,9 +38,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="flex min-h-full flex-col">
-        <Navbar />
+        {/* contents: sticky header-ийг эвдэхгүйгээр хэвлэх үед нуух */}
+        <div className="contents print:hidden">
+          <Navbar />
+        </div>
         <main className="flex-1">{children}</main>
-        <Footer />
+        <div className="contents print:hidden">
+          <Footer />
+        </div>
       </body>
     </html>
   )
