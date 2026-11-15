@@ -1,10 +1,12 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { Suspense } from "react"
 
 import { NextStep } from "@/components/services/next-step"
 import { ProcessStepper } from "@/components/services/process-stepper"
 import { ProgramList } from "@/components/services/program-list"
 import { ServiceHero } from "@/components/services/service-hero"
+import { ServicePageSkeleton } from "@/components/services/service-page-skeleton"
 import { ServicePricing } from "@/components/services/service-pricing"
 import { CtaBanner } from "@/components/shared/cta-banner"
 import { FaqAccordion } from "@/components/shared/faq-accordion"
@@ -21,7 +23,17 @@ export async function generateMetadata({ params }: PageProps<"/services/[slug]">
   return service ? { title: service.name, description: service.shortDescription } : {}
 }
 
-export default async function ServicePage({ params }: PageProps<"/services/[slug]">) {
+// params нь URL өгөгдөл тул Suspense дотор уншина — App Shell бүх slug-д нэг байж, навигаци шууд эхэлнэ.
+// Мэдэгдэж буй slug-ууд generateStaticParams-аар бүрэн prerender хийгдэнэ.
+export default function ServicePage({ params }: PageProps<"/services/[slug]">) {
+  return (
+    <Suspense fallback={<ServicePageSkeleton />}>
+      <ServicePageContent params={params} />
+    </Suspense>
+  )
+}
+
+async function ServicePageContent({ params }: Pick<PageProps<"/services/[slug]">, "params">) {
   const { slug } = await params
   const service = getService(slug)
   if (!service) notFound()

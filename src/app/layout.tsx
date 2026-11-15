@@ -32,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="mn"
       className={`${inter.variable} ${montserrat.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
