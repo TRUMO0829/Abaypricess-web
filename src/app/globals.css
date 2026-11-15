@@ -2,7 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+/* `.light` хүрээн доторх элемент (ж: тайлангийн цаас) dark variant авахгүй */
+@custom-variant dark (&:is(.dark *):not(:is(.light, .light *)));
 
 @theme inline {
   --color-background: var(--background);
@@ -47,8 +48,10 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Абая Прайсэс брэнд: логоны royal blue #003199 = oklch(0.367 0.175 262.4) */
-:root {
+/* Абая Прайсэс брэнд: логоны royal blue #003199 = oklch(0.367 0.175 262.4)
+   `.light` нь dark горим дотор ч light token-уудыг дахин зарлана (тайлангийн цаас, хэвлэх) */
+:root,
+.light {
   --background: oklch(1 0 0);
   --foreground: oklch(0.18 0.02 262);
   --card: oklch(1 0 0);
@@ -147,5 +150,12 @@
   }
   @media (width >= 64rem) {
     padding-inline: 2rem;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
   }
 }
