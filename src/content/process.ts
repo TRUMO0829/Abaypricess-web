@@ -45,3 +45,13 @@ export const flowStages: FlowStage[] = [
     icon: FileBarChart,
   },
 ]
+
+/** Диаграммын "Эхлэх" / "Дуусах" тэмдэглэгээ ба шошго */
+export const flowLabels = {
+  start: "Эхлэх",
+  end: "Дуусах",
+  step: "Алхам",
+  action: "Үйлдэл",
+  document: "Баримт",
+  detailedProcess: "Дэлгэрэнгүй процесс",
+}
