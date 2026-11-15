@@ -8,7 +8,41 @@ async function choose(page: Page, trigger: string, option: string) {
   await page.getByRole("option", { name: option }).click()
 }
 
+/**
+ * mailto шилжилтийг stub хийнэ — тест хэзээ ч хэрэглэгчийн имэйл программыг бодитоор нээх ёсгүй.
+ * `openMailClient()` нь `<a>.click()` ашигладаг тул mailto click-ийг бүртгээд navigation-ийг зогсооно.
+ */
+async function stubMailto(page: Page) {
+  await page.addInitScript(() => {
+    const w = window as unknown as { __mailtoCalls: string[]; __mailtoStubbed: boolean }
+    w.__mailtoCalls = []
+    const original = HTMLAnchorElement.prototype.click
+    HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+      if (this.href.startsWith("mailto:")) {
+        w.__mailtoCalls.push(this.href)
+        return
+      }
+      return original.call(this)
+    }
+    // Хэрэглэгч "дахин нээх" холбоос дээр дарах зэрэг бодит mailto navigation-ийг ч хаана
+    document.addEventListener(
+      "click",
+      (event) => {
+        const anchor = (event.target as Element | null)?.closest?.("a[href^='mailto:']")
+        if (anchor) event.preventDefault()
+      },
+      true
+    )
+    w.__mailtoStubbed = true
+  })
+}
+
 test.describe("/contact хүсэлтийн маягт", () => {
+  // Бүх тестэд stub идэвхтэй — маягт илгээх бүрд mailto нээгдэх эрсдэлгүй
+  test.beforeEach(async ({ page }) => {
+    await stubMailto(page)
+  })
+
   test("?service=&package= утгаар урьдчилж бөглөнө", async ({ page }) => {
     await page.goto("/contact?service=laboratory&package=full")
     await expect(serviceTrigger(page)).toContainText("Бизнес лаборатори")
@@ -67,9 +101,14 @@ test.describe("/contact хүсэлтийн маягт", () => {
     await page.locator("#organization").fill("Тест ХХК")
     await page.locator("#email").fill("test@example.mn")
     await page.locator("#phone").fill("9911 2233")
+    // Stub идэвхгүй бол submit хийхгүй (бодит Mail нээгдэхээс сэргийлнэ)
+    expect(await page.evaluate(() => (window as unknown as { __mailtoStubbed?: boolean }).__mailtoStubbed)).toBe(true)
     await page.getByRole("button", { name: "Хүсэлт илгээх" }).click()
 
     await expect(page.getByText("Имэйл программ тань нээгдэж байна")).toBeVisible()
+    const calls = await page.evaluate(() => (window as unknown as { __mailtoCalls: string[] }).__mailtoCalls)
+    expect(calls).toHaveLength(1)
+    expect(calls[0]).toMatch(/^mailto:/)
     await expect(page.getByText(/амжилттай/i)).toHaveCount(0)
 
     const href = await page.getByRole("link", { name: "Имэйлийг дахин нээх" }).getAttribute("href")

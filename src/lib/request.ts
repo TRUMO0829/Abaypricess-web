@@ -21,6 +21,18 @@ export async function submitRequest(data: RequestInput): Promise<SubmitResult> {
   }
 }
 
+/**
+ * Имэйл программыг mailto холбоосоор нээнэ (зөвхөн browser-т).
+ * Түр `<a>` дээр click хийдэг тул e2e тест `HTMLAnchorElement.prototype.click`-ийг stub хийж
+ * бодит программ нээлгүйгээр зөвхөн href-ийг шалгаж чадна.
+ */
+export function openMailClient(href: string): void {
+  const link = document.createElement("a")
+  link.href = href
+  link.rel = "noopener"
+  link.click()
+}
+
 /** Багцын id-г хүнд ойлгомжтой нэр болгоно: "standard" → "Стандарт". */
 export function getPackageName(service: RequestInput["service"], packageId?: string): string | undefined {
   if (!packageId || service === "other") return undefined

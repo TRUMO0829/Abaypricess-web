@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { company } from "@/content/company"
 import { requestFormContent, serviceOptions } from "@/content/contact"
 import { getService } from "@/content/services"
-import { submitRequest, type SubmitResult } from "@/lib/request"
+import { openMailClient, submitRequest, type SubmitResult } from "@/lib/request"
 import {
   requestSchema,
   requestServiceValues,
@@ -97,7 +97,7 @@ export function RequestForm() {
     setResult(null)
     const next = await submitRequest(values)
     setResult(next)
-    if (next.status === "mailto") window.location.assign(next.href)
+    if (next.status === "mailto") openMailClient(next.href)
   }
 
   function onInvalid() {
