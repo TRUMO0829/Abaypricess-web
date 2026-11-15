@@ -7,7 +7,8 @@ import type { ReportTemplate } from "@/types/content"
 const skeletonWidths = ["w-full", "w-11/12", "w-4/5"]
 
 /**
- * A4 тайлангийн preview. `light` class нь цаасыг dark горимд ч, хэвлэхэд ч цагаан байлгана
+ * A4 тайлангийн preview. Өндөр = max(A4 харьцаа, агуулга): grid-ийн нэг нүдэнд A4 spacer болон
+ * агуулгыг давхарласан тул агуулга урт үед цаас сунана, хэзээ ч цааснаас гарахгүй. `light` class нь цаасыг dark горимд ч, хэвлэхэд ч цагаан байлгана
  * (globals.css-ийн `:root, .light` token scope).
  */
 export function ReportPreview({ template }: { template: ReportTemplate }) {
@@ -17,8 +18,8 @@ export function ReportPreview({ template }: { template: ReportTemplate }) {
     <article
       aria-label={template.title}
       className={cn(
-        "light relative isolate mx-auto w-full max-w-[210mm] bg-card text-card-foreground",
-        "rounded-sm shadow-2xl ring-1 shadow-foreground/10 ring-foreground/10 md:aspect-[210/297]",
+        "light relative isolate mx-auto grid w-full max-w-[210mm] bg-card text-card-foreground",
+        "rounded-sm shadow-2xl ring-1 shadow-foreground/10 ring-foreground/10",
         "print:max-w-none print:rounded-none print:shadow-none print:ring-0"
       )}
     >
@@ -30,7 +31,10 @@ export function ReportPreview({ template }: { template: ReportTemplate }) {
         <span className="-rotate-30">{paper.watermark}</span>
       </span>
 
-      <div className="flex h-full flex-col gap-8 p-6 sm:p-10 md:p-[14mm]">
+      {/* A4 харьцааны хамгийн бага өндөр */}
+      <div aria-hidden className="col-start-1 row-start-1 hidden md:block md:aspect-[210/297]" />
+
+      <div className="col-start-1 row-start-1 flex min-w-0 flex-col gap-8 p-6 sm:p-10 md:p-[14mm]">
         {/* Толгой */}
         <header className="flex flex-col gap-6 border-b-2 border-primary pb-6">
           <div className="flex flex-wrap items-start justify-between gap-4">

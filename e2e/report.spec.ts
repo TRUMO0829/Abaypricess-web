@@ -10,6 +10,25 @@ test.describe("/report тайлангийн загвар", () => {
     await expect(page.getByRole("heading", { name: "Шинэчлэлийн үр дүнгийн тайлан" })).toBeVisible()
   })
 
+  for (const tab of ["Сургалт", "Лаборатори", "Шинэчлэл"]) {
+    for (const media of ["screen", "print"] as const) {
+      test(`${tab} (${media}): агуулга, хөл цаасан дотор багтана`, async ({ page }) => {
+        await page.goto("/report")
+        await page.getByRole("tab", { name: tab }).click()
+        await page.emulateMedia({ media })
+        const paper = page.locator("article").first()
+        const footer = paper.locator("footer")
+        await expect(footer).toBeVisible()
+        const p = (await paper.boundingBox())!
+        const f = (await footer.boundingBox())!
+        expect(f.y).toBeGreaterThanOrEqual(p.y)
+        expect(f.y + f.height).toBeLessThanOrEqual(p.y + p.height + 0.5)
+        // Цаас A4 харьцаанаас намхан биш (md+)
+        if (p.width >= 600) expect(p.height).toBeGreaterThanOrEqual((p.width * 297) / 210 - 1)
+      })
+    }
+  }
+
   test("хэвлэх үед зөвхөн цаас харагдана", async ({ page }) => {
     await page.goto("/report")
     await page.emulateMedia({ media: "print" })
