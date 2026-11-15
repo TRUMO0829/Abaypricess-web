@@ -1,5 +1,5 @@
 // Сайтын бүх агуулгын гэрээ (contract). `src/content/*` эдгээр төрлийг дагана.
-// Өөрчлөлт хэрэгтэй бол coordinator (website-f4)-д хүсэлт илгээнэ.
+// Өөрчлөлт хэрэгтэй бол coordinator (abaya-pricing-website-setup)-д хүсэлт илгээнэ.
 import type { LucideIcon } from "lucide-react"
 
 export type ServiceSlug = "training" | "laboratory" | "update"

@@ -16,14 +16,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 | Session | Branch / worktree | Эзэмших файлууд |
 |---|---|---|
-| **website-f4** (coordinator) | `main` | `src/components/ui/`, `src/components/shared/`, `src/types/`, `src/lib/utils.ts`, `src/lib/format.ts`, `src/lib/theme.ts`, `src/app/layout.tsx`, `src/app/globals.css`, `package.json`, `next.config.ts`, `docs/`, `AGENTS.md` |
+| **abaya-pricing-website-setup** (coordinator) | `main` | `src/components/ui/`, `src/components/shared/`, `src/types/`, `src/lib/utils.ts`, `src/lib/format.ts`, `src/lib/theme.ts`, `src/app/layout.tsx`, `src/app/globals.css`, `package.json`, `next.config.ts`, `docs/`, `AGENTS.md` |
 | **ABAY-1** · Layout & Нүүр | `feat/ui` · `../Website-wt/ui` | `src/components/layout/`, `src/components/home/`, `src/app/page.tsx`, `src/app/about/`, `src/app/not-found.tsx`, `src/app/sitemap.ts`, `src/app/robots.ts`, `src/app/icon.*`, `src/app/opengraph-image.*`, `src/content/{company,home,faq,navigation,process}.ts` |
 | **ABAY-2** · Үйлчилгээ | `feat/services` · `../Website-wt/services` | `src/components/services/`, `src/app/services/`, `src/content/services.ts` |
 | **ABAY-3** · Тайлан & Хүсэлт | `feat/report` · `../Website-wt/report` | `src/components/report/`, `src/components/contact/`, `src/app/report/`, `src/app/contact/`, `src/content/{report,contact}.ts`, `src/lib/{request,request-schema}.ts` |
 
 ## Дүрэм
 
-1. **Зөвхөн өөрийн эзэмшлийн файлыг засна.** Бусдын файл, `types/`, `ui/`, `shared/`, `package.json`-д өөрчлөлт хэрэгтэй бол coordinator руу `SendMessage` (to: `website-f4`) илгээнэ: юу, яагаад, ямар interface.
+1. **Зөвхөн өөрийн эзэмшлийн файлыг засна.** Бусдын файл, `types/`, `ui/`, `shared/`, `package.json`-д өөрчлөлт хэрэгтэй бол coordinator руу `SendMessage` (to: `abaya-pricing-website-setup`) илгээнэ: юу, яагаад, ямар interface.
 2. Бусдын файлыг **уншиж, import хийж** болно (ж: ABAY-2 `flowStages`-ийг уншина).
 3. Шинэ npm package суулгахгүй — coordinator-оос хүснэ. shadcn component хэрэгтэй бол мөн адил.
 4. Өөрийн worktree дээр ажиллана (`main`-д шууд commit хийхгүй). Commit-ийг жижиг, утга бүхий байлгана.
