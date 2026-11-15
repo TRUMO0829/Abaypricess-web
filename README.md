@@ -8,6 +8,7 @@ npm install
 cp .env.example .env.local
 npm run dev        # http://localhost:3000
 npm run check      # lint + typecheck + build
+npm run test:e2e   # Playwright smoke/e2e (систем дээрх Chrome ашиглана)
 ```
 
 - Архитектур, route, дизайн: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)

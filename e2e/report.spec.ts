@@ -23,6 +23,9 @@ test.describe("/report тайлангийн загвар", () => {
         const f = (await footer.boundingBox())!
         expect(f.y).toBeGreaterThanOrEqual(p.y)
         expect(f.y + f.height).toBeLessThanOrEqual(p.y + p.height + 0.5)
+        // Хэвтээ чиглэлд ч цааснаас гарахгүй
+        expect(f.x).toBeGreaterThanOrEqual(p.x - 0.5)
+        expect(f.x + f.width).toBeLessThanOrEqual(p.x + p.width + 0.5)
         // Цаас A4 харьцаанаас намхан биш (md+)
         if (p.width >= 600) expect(p.height).toBeGreaterThanOrEqual((p.width * 297) / 210 - 1)
       })

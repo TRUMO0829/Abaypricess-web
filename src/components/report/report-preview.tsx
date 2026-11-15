@@ -18,7 +18,7 @@ export function ReportPreview({ template }: { template: ReportTemplate }) {
     <article
       aria-label={template.title}
       className={cn(
-        "light relative isolate mx-auto grid w-full max-w-[210mm] bg-card text-card-foreground",
+        "light relative isolate mx-auto grid w-full max-w-[210mm] grid-cols-1 bg-card text-card-foreground",
         "rounded-sm shadow-2xl ring-1 shadow-foreground/10 ring-foreground/10",
         "print:max-w-none print:rounded-none print:shadow-none print:ring-0"
       )}
@@ -32,7 +32,7 @@ export function ReportPreview({ template }: { template: ReportTemplate }) {
       </span>
 
       {/* A4 харьцааны хамгийн бага өндөр */}
-      <div aria-hidden className="col-start-1 row-start-1 hidden md:block md:aspect-[210/297]" />
+      <div aria-hidden className="col-start-1 row-start-1 hidden w-full self-start md:block md:aspect-[210/297]" />
 
       <div className="col-start-1 row-start-1 flex min-w-0 flex-col gap-8 p-6 sm:p-10 md:p-[14mm]">
         {/* Толгой */}
