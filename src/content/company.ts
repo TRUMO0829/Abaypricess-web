@@ -43,3 +43,19 @@ export const company: Company = {
     hours: "Даваа–Баасан, 09:00–18:00",
   },
 }
+
+/** /about хуудасны гарчгууд */
+export const aboutPage = {
+  title: "Бидний",
+  highlight: "тухай",
+  eyebrow: "Абая Прайсэс ХХК",
+  introTitle: "Байгууллагын танилцуулга",
+  missionLabel: "Эрхэм зорилго",
+  visionLabel: "Алсын хараа",
+  valuesEyebrow: "Үнэт зүйлс",
+  valuesTitle: "Бидний баримталдаг",
+  valuesHighlight: "зарчим",
+  processEyebrow: "Хэрхэн ажилладаг вэ",
+  processTitle: "Бидний ажлын",
+  processHighlight: "урсгал",
+}

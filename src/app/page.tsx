@@ -1,14 +1,20 @@
+import { FaqSection } from "@/components/home/faq-section"
+import { Hero } from "@/components/home/hero"
+import { IntroSection } from "@/components/home/intro-section"
+import { ProcessFlow } from "@/components/home/process-flow"
+import { ServicesPreview } from "@/components/home/services-preview"
+import { Statistics } from "@/components/home/statistics"
 import { CtaBanner } from "@/components/shared/cta-banner"
-import { SectionHeading } from "@/components/shared/section-heading"
-import { hero } from "@/content/home"
 
-// TODO(ABAY-1): Hero, HeroCards, Эрхэм зорилго, ProcessFlow, ServicesPreview, Statistics, FAQ
 export default function HomePage() {
   return (
     <>
-      <section className="container py-20 md:py-32">
-        <SectionHeading as="h1" eyebrow={hero.eyebrow} title={hero.title} highlight={hero.highlight} description={hero.description} />
-      </section>
+      <Hero />
+      <IntroSection />
+      <ProcessFlow className="border-t bg-muted/20" />
+      <ServicesPreview />
+      <Statistics />
+      <FaqSection />
       <CtaBanner />
     </>
   )
