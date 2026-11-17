@@ -129,7 +129,7 @@ export const reportPageContent = {
     dateLabel: "Огноо",
     dateValue: "20XX.XX.XX",
     reportNoLabel: "Тайлангийн дугаар",
-    reportNoValue: "AP-20XX-000",
+    reportNoValue: "AM-20XX-000",
     metricsTitle: "Гол үзүүлэлтүүд",
     footer: "Энэхүү баримт нь жишээ загвар бөгөөд бодит харилцагчийн мэдээлэл агуулаагүй болно.",
     page: "Хуудас 1",

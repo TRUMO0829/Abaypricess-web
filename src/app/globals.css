@@ -48,7 +48,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Абая Прайсэс брэнд: логоны royal blue #003199 = oklch(0.367 0.175 262.4)
+/* Adapt Management брэнд: логоны royal blue #003199 = oklch(0.367 0.175 262.4)
    `.light` нь dark горим дотор ч light token-уудыг дахин зарлана (тайлангийн цаас, хэвлэх) */
 :root,
 .light {

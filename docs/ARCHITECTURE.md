@@ -1,7 +1,9 @@
 # Архитектур
 
-Абая Прайсэс ХХК-ийн албан ёсны вебсайт. Агуулга нь `docs/brief/process-diagram.png` диаграммыг дагана:
+Адапт Менежмент ХХК (Adapt Management)-ийн албан ёсны вебсайт. Агуулга нь `docs/brief/process-diagram.png` диаграммыг дагана:
 **Танилцуулга → Training → Laboratory → Update → Тайлан**. Эх brief: `docs/brief/brief.txt`.
+
+> Брэндийн нэр 2026-11-15-нд захиалагчийн хүсэлтээр "Абая Прайсэс"-ээс "Adapt Management" болж өөрчлөгдсөн. `docs/brief/` дахь эх материал (brief, хуучин лого) хуучин нэртэйгээ үлдэнэ. Компанийн нэр зөвхөн `src/content/company.ts`-д, лого тэмдэг `src/lib/brand.ts`-д байна.
 
 ## Стек
 
@@ -37,7 +39,7 @@ src/
 │  ├─ report/            тайлангийн preview (ABAY-3)
 │  └─ contact/           маягт, холбоо барих мэдээлэл (ABAY-3)
 ├─ content/              бүх текст, үнэ, алхам — typed data (монгол)
-├─ lib/                  utils (cn), format (formatMNT), theme, request-schema, request
+├─ lib/                  utils (cn), format (formatMNT), theme, brand (лого тэмдэг), request-schema, request
 └─ types/content.ts      агуулгын гэрээ (contract)
 ```
 

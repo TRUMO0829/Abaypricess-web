@@ -8,7 +8,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Абая Прайсэс вебсайт — агентуудын дүрэм
+# Adapt Management вебсайт — агентуудын дүрэм
 
 Архитектур, route, дизайны дүрэм: `docs/ARCHITECTURE.md`. Эх brief: `docs/brief/`.
 
@@ -16,7 +16,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 | Session | Branch / worktree | Эзэмших файлууд |
 |---|---|---|
-| **abaya-pricing-website-setup** (coordinator) | `main` | `src/components/ui/`, `src/components/shared/`, `src/types/`, `src/lib/utils.ts`, `src/lib/format.ts`, `src/lib/theme.ts`, `src/app/layout.tsx`, `src/app/globals.css`, `package.json`, `next.config.ts`, `docs/`, `AGENTS.md` |
+| **abaya-pricing-website-setup** (coordinator) | `main` | `src/components/ui/`, `src/components/shared/`, `src/types/`, `src/lib/utils.ts`, `src/lib/format.ts`, `src/lib/theme.ts`, `src/lib/brand.ts`, `src/app/layout.tsx`, `src/app/globals.css`, `package.json`, `next.config.ts`, `docs/`, `AGENTS.md` |
 | **ABAY-1** · Layout & Нүүр | `feat/ui` · `../Website-wt/ui` | `src/components/layout/`, `src/components/home/`, `src/app/page.tsx`, `src/app/about/`, `src/app/not-found.tsx`, `src/app/sitemap.ts`, `src/app/robots.ts`, `src/app/icon.*`, `src/app/opengraph-image.*`, `src/content/{company,home,faq,navigation,process}.ts` |
 | **ABAY-2** · Үйлчилгээ | `feat/services` · `../Website-wt/services` | `src/components/services/`, `src/app/services/`, `src/content/services.ts` |
 | **ABAY-3** · Тайлан & Хүсэлт | `feat/report` · `../Website-wt/report` | `src/components/report/`, `src/components/contact/`, `src/app/report/`, `src/app/contact/`, `src/content/{report,contact}.ts`, `src/lib/{request,request-schema}.ts` |

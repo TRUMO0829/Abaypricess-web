@@ -1,14 +1,14 @@
 import { ImageResponse } from "next/og"
 
 import { company } from "@/content/company"
+import { brandHex, logoMark } from "@/lib/brand"
 
 export const alt = `${company.nameEn} — ${company.legalName}`
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-// next/og нь CSS token уншихгүй тул брэнд өнгийг энд шууд бичнэ (#003199 = --primary)
-const BRAND = "#003199"
-const INK = "#0f172a"
+const { primary: BRAND, ink: INK } = brandHex
+const [firstWord, ...restWords] = company.nameEn.split(" ")
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -26,13 +26,13 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-          <svg width="110" height="141" viewBox="16 16 290 372">
-            <path fill={INK} d="M22 52 80 20 302 150v46L108 322v-60l132-84L82 92l-60 28Z" />
-            <path fill={BRAND} d="M22 152 80 124v68l62-36 54 30-110 64v94l22 12-86 32Z" />
+          <svg width="140" height="140" viewBox={logoMark.viewBox}>
+            <path fill={INK} d={logoMark.ink} />
+            <path fill={BRAND} d={logoMark.accent} />
           </svg>
           <div style={{ display: "flex", flexDirection: "column", fontSize: 76, fontWeight: 700, lineHeight: 0.95 }}>
-            <span style={{ color: BRAND }}>Abay</span>
-            <span>Pricess</span>
+            <span style={{ color: BRAND }}>{firstWord}</span>
+            <span>{restWords.join(" ")}</span>
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>

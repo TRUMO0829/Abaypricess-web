@@ -43,7 +43,7 @@ test.describe("/report тайлангийн загвар", () => {
   })
 
   test("dark горимд ч цаас цагаан байна", async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem("abay-theme", "dark"))
+    await page.addInitScript(() => localStorage.setItem("adapt-theme", "dark"))
     await page.goto("/report")
     await expect(page.locator("html")).toHaveClass(/dark/)
     const paper = page.getByRole("article", { name: "Сургалтын үр дүнгийн тайлан" })

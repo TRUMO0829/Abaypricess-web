@@ -1,22 +1,20 @@
 import Link from "next/link"
 
+import { company } from "@/content/company"
+import { logoMark } from "@/lib/brand"
 import { cn } from "@/lib/utils"
 
-/** docs/brief/logo.png-ийн "P" хэлбэртэй гурвалжин тэмдэг. Өнгө нь token-оос тул dark горимд ч тод. */
+/** "A" тэмдэг. Өнгө нь token-оос тул dark горимд ч тод. */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="16 16 290 372" aria-hidden="true" focusable="false" className={cn("h-8 w-auto shrink-0", className)}>
-      <path
-        className="fill-foreground"
-        d="M22 52 80 20 302 150v46L108 322v-60l132-84L82 92l-60 28Z"
-      />
-      <path
-        className="fill-primary"
-        d="M22 152 80 124v68l62-36 54 30-110 64v94l22 12-86 32Z"
-      />
+    <svg viewBox={logoMark.viewBox} aria-hidden="true" focusable="false" className={cn("h-8 w-auto shrink-0", className)}>
+      <path className="fill-foreground" d={logoMark.ink} />
+      <path className="fill-primary" d={logoMark.accent} />
     </svg>
   )
 }
+
+const [firstWord, ...restWords] = company.nameEn.split(" ")
 
 export function Logo({ className }: { className?: string }) {
   return (
@@ -29,10 +27,10 @@ export function Logo({ className }: { className?: string }) {
     >
       <LogoMark />
       <span className="flex flex-col text-[1.05rem] leading-[0.95]">
-        <span className="text-primary">Abay</span>
-        <span className="text-foreground">Pricess</span>
+        <span className="text-primary">{firstWord}</span>
+        <span className="text-foreground">{restWords.join(" ")}</span>
       </span>
-      <span className="sr-only">— Абая Прайсэс ХХК, нүүр хуудас</span>
+      <span className="sr-only">— {company.legalName}, нүүр хуудас</span>
     </Link>
   )
 }
