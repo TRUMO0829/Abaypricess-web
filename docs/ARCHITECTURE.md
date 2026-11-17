@@ -3,7 +3,7 @@
 Адапт Менежмент ХХК (Adapt Management)-ийн албан ёсны вебсайт. Агуулга нь `docs/brief/process-diagram.png` диаграммыг дагана:
 **Танилцуулга → Training → Laboratory → Update → Тайлан**. Эх brief: `docs/brief/brief.txt`.
 
-> Брэндийн нэр 2026-11-15-нд захиалагчийн хүсэлтээр "Абая Прайсэс"-ээс "Adapt Management" болж өөрчлөгдсөн. `docs/brief/` дахь эх материал (brief, хуучин лого) хуучин нэртэйгээ үлдэнэ. Компанийн нэр зөвхөн `src/content/company.ts`-д, лого тэмдэг `src/lib/brand.ts`-д байна.
+> Брэндийн нэр 2026-11-15-нд захиалагчийн хүсэлтээр "Абая Прайсэс"-ээс "Adapt Management" болж өөрчлөгдсөн. 2026-11-17-нд албан ёсны лого ирж (`docs/brief/adapt-logo.png`), брэнд өнгө нь логоны нил ягаан болсон. `docs/brief/` дахь бусад эх материал (brief, хуучин `logo.png`) хуучин нэртэйгээ үлдэнэ. Компанийн нэр `src/content/company.ts`-д, логоны asset `src/lib/brand.ts` + `public/brand/`-д байна.
 
 ## Стек
 
@@ -39,7 +39,7 @@ src/
 │  ├─ report/            тайлангийн preview (ABAY-3)
 │  └─ contact/           маягт, холбоо барих мэдээлэл (ABAY-3)
 ├─ content/              бүх текст, үнэ, алхам — typed data (монгол)
-├─ lib/                  utils (cn), format (formatMNT), theme, brand (лого тэмдэг), request-schema, request
+├─ lib/                  utils (cn), format (formatMNT), theme, brand (лого asset), request-schema, request
 └─ types/content.ts      агуулгын гэрээ (contract)
 ```
 
@@ -52,7 +52,7 @@ src/
 
 ## Дизайн
 
-- Брэнд өнгө: логоны royal blue `#003199` = `--primary` (light). Dark горимд `oklch(0.68 0.15 262.5)`. Өнгө hard-code хийхгүй — `bg-primary`, `text-muted-foreground` гэх мэт token class ашиглана.
+- Брэнд өнгө: логоны нил ягаан `#441E82` = `--primary` (light). Dark горимд `oklch(0.72 0.14 294)`. Лого: `BrandLogo` (`components/layout/logo.tsx`) нь CSS mask тул light горимд primary, dark горимд цагаан. Өнгө hard-code хийхгүй — `bg-primary`, `text-muted-foreground` гэх мэт token class ашиглана.
 - Фонт: Inter (`font-sans`, үндсэн текст), Montserrat (`font-heading`, h1–h4 автоматаар). Хоёулаа `cyrillic-ext` subset-тэй тул Ө, Ү зөв харагдана.
 - Хуудасны өргөн: `container` utility (max 1280px, 16/24/32px padding).
 - Section-ийн хэмнэл: `py-20 md:py-28`. Гарчиг: `SectionHeading` (`highlight` хэсэг нь primary gradient).

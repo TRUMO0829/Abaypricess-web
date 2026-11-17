@@ -1,14 +1,17 @@
+import { readFile } from "node:fs/promises"
+import { join } from "node:path"
 import { ImageResponse } from "next/og"
 
 import { company } from "@/content/company"
-import { brandHex, logoMark } from "@/lib/brand"
+import { brandHex, brandLogo } from "@/lib/brand"
 
 export const alt = `${company.nameEn} — ${company.legalName}`
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
-const { primary: BRAND, ink: INK } = brandHex
-const [firstWord, ...restWords] = company.nameEn.split(" ")
+const logoData = await readFile(join(process.cwd(), "public", brandLogo.src), "base64")
+const logoSrc = `data:image/png;base64,${logoData}`
+const LOGO_WIDTH = 520
 
 export default function OpengraphImage() {
   return new ImageResponse(
@@ -21,25 +24,21 @@ export default function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 80,
-          background: "linear-gradient(135deg, #ffffff 0%, #eef2fb 60%, #dfe7fb 100%)",
-          color: INK,
+          background: "linear-gradient(135deg, #ffffff 0%, #f4f0fa 60%, #e9e1f7 100%)",
+          color: brandHex.ink,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-          <svg width="140" height="140" viewBox={logoMark.viewBox}>
-            <path fill={INK} d={logoMark.ink} />
-            <path fill={BRAND} d={logoMark.accent} />
-          </svg>
-          <div style={{ display: "flex", flexDirection: "column", fontSize: 76, fontWeight: 700, lineHeight: 0.95 }}>
-            <span style={{ color: BRAND }}>{firstWord}</span>
-            <span>{restWords.join(" ")}</span>
-          </div>
-        </div>
+        <img
+          src={logoSrc}
+          alt=""
+          width={LOGO_WIDTH}
+          height={Math.round((LOGO_WIDTH * brandLogo.height) / brandLogo.width)}
+        />
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ fontSize: 52, fontWeight: 700 }}>{company.legalName}</div>
-          <div style={{ fontSize: 30, color: "#475569", maxWidth: 940 }}>{company.tagline}</div>
+          <div style={{ fontSize: 30, color: brandHex.muted, maxWidth: 940 }}>{company.tagline}</div>
         </div>
-        <div style={{ display: "flex", height: 12, width: 240, background: BRAND, borderRadius: 6 }} />
+        <div style={{ display: "flex", height: 12, width: 240, background: brandHex.primary, borderRadius: 6 }} />
       </div>
     ),
     size

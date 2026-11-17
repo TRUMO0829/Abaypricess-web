@@ -1,14 +1,14 @@
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
-import { LogoMark } from "@/components/layout/logo"
+import { BrandLogo } from "@/components/layout/logo"
 import { Button } from "@/components/ui/button"
 import { notFoundContent as t } from "@/content/navigation"
 
 export default function NotFound() {
   return (
     <section className="container flex min-h-[60vh] flex-col items-center justify-center gap-6 py-20 text-center">
-      <LogoMark className="h-16 opacity-90" />
+      <BrandLogo className="h-14 opacity-90" />
       <p className="bg-linear-to-b from-primary/70 to-primary bg-clip-text font-heading text-7xl font-bold text-transparent md:text-8xl">
         {t.code}
       </p>

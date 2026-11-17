@@ -1,5 +1,8 @@
+import Image from "next/image"
+
 import { company } from "@/content/company"
 import { reportPageContent } from "@/content/report"
+import { brandLogo } from "@/lib/brand"
 import { cn } from "@/lib/utils"
 import type { ReportTemplate } from "@/types/content"
 
@@ -20,7 +23,8 @@ export function ReportPreview({ template }: { template: ReportTemplate }) {
       className={cn(
         "light relative isolate mx-auto grid w-full max-w-[210mm] grid-cols-1 bg-card text-card-foreground",
         "rounded-sm shadow-2xl ring-1 shadow-foreground/10 ring-foreground/10",
-        "print:max-w-none print:rounded-none print:shadow-none print:ring-0"
+        // print-color-adjust: хэвлэхэд графикийн багана, лого (дэвсгэр өнгө) алга болохгүй
+        "[print-color-adjust:exact] print:max-w-none print:rounded-none print:shadow-none print:ring-0"
       )}
     >
       {/* ЖИШЭЭ watermark */}
@@ -38,13 +42,20 @@ export function ReportPreview({ template }: { template: ReportTemplate }) {
         {/* Толгой */}
         <header className="flex flex-col gap-6 border-b-2 border-primary pb-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <p className="font-heading text-xl leading-none font-bold">
-              <span className="text-primary">{company.nameEn.split(" ")[0]}</span>{" "}
-              {company.nameEn.split(" ").slice(1).join(" ")}
-              <span className="mt-1 block text-[0.65rem] font-medium tracking-wider text-muted-foreground uppercase">
+            <div className="flex flex-col gap-2">
+              {/* Цаас үргэлж цагаан тул mask биш шууд зураг: PDF-д mask-ийн ирмэг дээр зураас гардаг */}
+              <Image
+                src={brandLogo.src}
+                alt={company.nameEn}
+                width={brandLogo.width}
+                height={brandLogo.height}
+                loading="eager"
+                className="h-9 w-auto self-start"
+              />
+              <p className="text-[0.65rem] leading-none font-medium tracking-wider text-muted-foreground uppercase">
                 {company.legalName}
-              </span>
-            </p>
+              </p>
+            </div>
             <dl className="grid grid-cols-[auto_auto] gap-x-3 gap-y-0.5 text-xs">
               <dt className="text-muted-foreground">{paper.reportNoLabel}:</dt>
               <dd className="font-medium">{paper.reportNoValue}</dd>

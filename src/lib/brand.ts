@@ -1,13 +1,14 @@
-// "A" тэмдэг: зүүн хөл нь ink, баруун хөл + хөндлөн зураас нь primary.
-// TODO: захиалагчийн албан ёсны логогоор солих
-export const logoMark = {
-  viewBox: "0 0 100 100",
-  ink: "M4 94 40 6h20L24 94Z",
-  accent: "M63 13.3 96 94H76L53 37.8ZM43.9 60H70v12H39Z",
+// Захиалагчийн албан ёсны лого (эх файл: docs/brief/adapt-logo.png)-г тунгалаг фонтой болгосон хувилбар.
+// Сайт дээр CSS mask болгон ашигладаг тул өнгө нь token-оос авна (light: primary, dark: цагаан).
+export const brandLogo = {
+  src: "/brand/adapt-logo.png",
+  width: 1469,
+  height: 474,
 }
 
-// next/og нь CSS token уншихгүй тул OG зураг, favicon-д hex утгыг ашиглана (#003199 = --primary)
+// next/og нь CSS token уншихгүй тул OG зурагт hex утгыг ашиглана (#441e82 = --primary)
 export const brandHex = {
-  primary: "#003199",
-  ink: "#0f172a",
+  primary: "#441e82",
+  ink: "#18141f",
+  muted: "#5b5468",
 }

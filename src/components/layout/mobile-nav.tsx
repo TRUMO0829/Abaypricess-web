@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { Menu } from "lucide-react"
 
 import { isActivePath, serviceIcon } from "@/components/layout/nav-links"
-import { LogoMark } from "@/components/layout/logo"
+import { BrandLogo } from "@/components/layout/logo"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { company } from "@/content/company"
@@ -28,8 +28,8 @@ export function MobileNav() {
       <SheetContent side="right" className="w-[85%] gap-0 overflow-y-auto">
         <SheetHeader className="border-b">
           <SheetTitle className="flex items-center gap-2 font-bold">
-            <LogoMark className="h-6" />
-            {company.legalName}
+            <BrandLogo className="h-8" />
+            <span className="sr-only">{company.legalName}</span>
           </SheetTitle>
           <SheetDescription>{company.tagline}</SheetDescription>
         </SheetHeader>
