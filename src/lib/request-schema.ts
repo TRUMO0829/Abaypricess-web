@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import { meetingDurationValues, meetingModeValues } from "@/content/booking"
 import { getService } from "@/content/services"
 
 /** Багц сонгоогүй гэдгийг илэрхийлэх Select-ийн утга (Radix Select хоосон утга зөвшөөрдөггүй). */
@@ -12,6 +13,9 @@ export const requestServiceValues = ["training", "laboratory", "update", "other"
  * `+976`/`976` угтвар, хоосон зай, зураас зөвшөөрнө: "99112233", "9911 2233", "+976 9911-2233".
  */
 export const MN_PHONE_REGEX = /^(?:\+?976[\s-]?)?[1-9]\d{3}[\s-]?\d{4}$/
+
+/** Сул цагийн эхлэл: "2026-11-20T10:00:00+08:00" (lib/booking/slots.ts-ийн toLocalIso). */
+const MEETING_START_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00[+-]\d{2}:\d{2}$/
 
 const optionalText = (max: number, error: string) =>
   z
@@ -52,8 +56,19 @@ export const requestSchema = z
       .optional()
       .transform((value) => (value && value !== UNDECIDED_PACKAGE ? value : undefined)),
     message: optionalText(2000, "2000 тэмдэгтээс хэтрэхгүй"),
+    /** Уулзалтын цаг — заавал биш. Хоосон бол хүсэлт цаггүй илгээгдэнэ. */
+    meetingStart: z
+      .string()
+      .optional()
+      .transform((value) => (value ? value : undefined))
+      .refine((value) => !value || MEETING_START_REGEX.test(value), { error: "Уулзалтын цаг буруу байна" }),
+    meetingDuration: z.enum(meetingDurationValues).optional(),
+    meetingMode: z.enum(meetingModeValues).optional(),
   })
   .superRefine((data, ctx) => {
+    if (data.meetingStart && (!data.meetingDuration || !data.meetingMode)) {
+      ctx.addIssue({ code: "custom", path: ["meetingStart"], message: "Уулзалтын хугацаа, хэлбэрээ сонгоно уу" })
+    }
     if (!data.packageId) return
     const service = data.service === "other" ? undefined : getService(data.service)
     if (!service?.packages.some((pkg) => pkg.id === data.packageId)) {

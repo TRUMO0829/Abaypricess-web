@@ -15,7 +15,7 @@ export function ContactInfo() {
   ]
 
   return (
-    <aside className="flex flex-col gap-6">
+    <aside className="grid items-start gap-6 md:grid-cols-2">
       <section aria-labelledby="contact-info-title" className="rounded-xl bg-card p-6 ring-1 ring-foreground/10">
         <h2 id="contact-info-title" className="text-lg font-semibold">
           {title}

@@ -1,19 +1,22 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type BaseSyntheticEvent } from "react"
 import { useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { AlertCircle, CheckCircle2, Loader2, Mail, Phone, Send } from "lucide-react"
+import { AlertCircle, CalendarCheck, CheckCircle2, Loader2, Mail, MapPin, Phone, Send, Video } from "lucide-react"
 import { Controller, useForm, useWatch, type DefaultValues } from "react-hook-form"
 
+import { MeetingPicker } from "@/components/contact/meeting-picker"
 import { Button } from "@/components/ui/button"
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { bookingContent } from "@/content/booking"
 import { company } from "@/content/company"
 import { requestFormContent, serviceOptions } from "@/content/contact"
 import { getService } from "@/content/services"
+import { formatMeeting } from "@/lib/booking/format"
 import { openMailClient, submitRequest, type SubmitResult } from "@/lib/request"
 import {
   requestSchema,
@@ -41,7 +44,19 @@ function useInitialValues(): DefaultValues<RequestFormValues> {
   const service = parseService(params.get("service"))
   const pkg = params.get("package")
   const packageId = pkg && packagesFor(service).some((p) => p.id === pkg) ? pkg : ""
-  return { name: "", organization: "", position: "", email: "", phone: "", service, packageId, message: "" }
+  return {
+    name: "",
+    organization: "",
+    position: "",
+    email: "",
+    phone: "",
+    service,
+    packageId,
+    message: "",
+    meetingStart: "",
+    meetingDuration: "60",
+    meetingMode: "online",
+  }
 }
 
 function ContactFallback() {
@@ -68,6 +83,7 @@ export function RequestForm() {
   const defaultValues = useInitialValues()
   const [result, setResult] = useState<SubmitResult | null>(null)
   const [showSummary, setShowSummary] = useState(false)
+  const [pickerRefresh, setPickerRefresh] = useState(0)
   const statusRef = useRef<HTMLDivElement>(null)
 
   const form = useForm<RequestFormValues, unknown, RequestInput>({
@@ -86,18 +102,27 @@ export function RequestForm() {
 
   const service = useWatch({ control, name: "service" })
   const packages = packagesFor(service)
+  const meetingStart = useWatch({ control, name: "meetingStart" }) ?? ""
+  const meetingDuration = useWatch({ control, name: "meetingDuration" }) ?? "60"
+  const meetingMode = useWatch({ control, name: "meetingMode" }) ?? "online"
 
   // Үр дүн гарахад дэлгэц уншигч болон keyboard хэрэглэгчийг мэдэгдэл рүү шилжүүлнэ
   useEffect(() => {
     if (result) statusRef.current?.focus()
   }, [result])
 
-  async function onValid(values: RequestInput) {
+  async function onValid(values: RequestInput, event?: BaseSyntheticEvent) {
     setShowSummary(false)
     setResult(null)
-    const next = await submitRequest(values)
+    const form = event?.target instanceof HTMLFormElement ? event.target : undefined
+    const honeypot = form ? String(new FormData(form).get("website") ?? "") : undefined
+    const next = await submitRequest(values, { honeypot })
     setResult(next)
     if (next.status === "mailto") openMailClient(next.href)
+    if (next.status === "slot-taken") {
+      setValue("meetingStart", "")
+      setPickerRefresh((n) => n + 1)
+    }
   }
 
   function onInvalid() {
@@ -125,6 +150,45 @@ export function RequestForm() {
         <p className="text-muted-foreground">{text.status.sent.description}</p>
         <Button variant="outline" onClick={startOver}>
           {text.status.sent.again}
+        </Button>
+      </div>
+    )
+  }
+
+  if (result?.status === "booked") {
+    const booked = bookingContent.status.booked
+    return (
+      <div
+        ref={statusRef}
+        tabIndex={-1}
+        role="status"
+        className="flex flex-col items-start gap-4 rounded-xl bg-card p-8 ring-1 ring-foreground/10 outline-none"
+      >
+        <span className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <CalendarCheck className="size-6" aria-hidden />
+        </span>
+        <h2 className="text-2xl font-bold">{booked.title}</h2>
+        <p className="text-lg font-semibold text-primary">{formatMeeting(result.start, result.duration)}</p>
+        <p className="text-muted-foreground">{booked.description}</p>
+        {result.mode === "online" ? (
+          <p className="flex items-center gap-2 text-sm">
+            <Video className="size-4 shrink-0 text-primary" aria-hidden />
+            {result.meetLink ? (
+              <a href={result.meetLink} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline-offset-4 hover:underline">
+                {booked.meetLink}
+              </a>
+            ) : (
+              booked.meet
+            )}
+          </p>
+        ) : (
+          <p className="flex items-center gap-2 text-sm">
+            <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
+            {booked.office} {company.contact.address}
+          </p>
+        )}
+        <Button variant="outline" onClick={startOver}>
+          {booked.again}
         </Button>
       </div>
     )
@@ -177,6 +241,19 @@ export function RequestForm() {
             <ContactFallback />
           </div>
         )}
+        {result?.status === "slot-taken" && (
+          <div
+            ref={statusRef}
+            tabIndex={-1}
+            className="rounded-lg bg-destructive/10 p-4 text-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <p className="flex items-center gap-2 font-semibold text-destructive">
+              <AlertCircle className="size-4 shrink-0" aria-hidden />
+              {bookingContent.status.slotTaken.title}
+            </p>
+            <p className="mt-1.5 text-muted-foreground">{result.message}</p>
+          </div>
+        )}
         {!result && showSummary && Object.keys(errors).length > 0 && (
           <p className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
             <AlertCircle className="size-4 shrink-0" aria-hidden />
@@ -185,8 +262,14 @@ export function RequestForm() {
         )}
       </div>
 
-      <form noValidate onSubmit={handleSubmit(onValid, onInvalid)} className="flex flex-col gap-6">
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-5 sm:grid-cols-2">
+      <form
+        noValidate
+        onSubmit={handleSubmit(onValid, onInvalid)}
+        className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-8"
+      >
+        {/* Ботод зориулсан нуугдмал талбар — хүн бөглөхгүй */}
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+        <div className="grid grid-cols-[minmax(0,1fr)] content-start gap-5 sm:grid-cols-2">
           <Field data-invalid={!!errors.name}>
             <FieldLabel htmlFor="name">
               {text.fields.name.label} <span aria-hidden>*</span>
@@ -374,7 +457,20 @@ export function RequestForm() {
           </Field>
         </div>
 
-        <Button type="submit" size="lg" disabled={isSubmitting} className="w-full sm:w-auto sm:self-start">
+        <div className="lg:sticky lg:top-24 lg:self-start">
+          <MeetingPicker
+            start={meetingStart}
+            duration={meetingDuration}
+            mode={meetingMode}
+            onStartChange={(value) => setValue("meetingStart", value)}
+            onDurationChange={(value) => setValue("meetingDuration", value)}
+            onModeChange={(value) => setValue("meetingMode", value)}
+            refreshKey={pickerRefresh}
+          />
+          <FieldError errors={[errors.meetingStart]} className="mt-2" />
+        </div>
+
+        <Button type="submit" size="lg" disabled={isSubmitting} className="w-full sm:w-auto sm:justify-self-start lg:col-span-2">
           {isSubmitting ? (
             <>
               <Loader2 className="animate-spin" data-icon="inline-start" aria-hidden />
@@ -383,7 +479,7 @@ export function RequestForm() {
           ) : (
             <>
               <Send data-icon="inline-start" aria-hidden />
-              {text.submit}
+              {meetingStart ? bookingContent.submitWithMeeting : text.submit}
             </>
           )}
         </Button>

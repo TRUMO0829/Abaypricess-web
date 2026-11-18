@@ -18,7 +18,7 @@ export default function ContactPage() {
         breadcrumbs={[{ label: "Холбоо барих" }]}
       />
       <section className="py-14 md:py-20">
-        <div className="container grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start lg:gap-12">
+        <div className="container flex flex-col gap-8 lg:gap-12">
           {/* useSearchParams (?service=&package=) нь runtime өгөгдөл тул Suspense шаардлагатай */}
           <Suspense fallback={<RequestFormSkeleton />}>
             <RequestForm />

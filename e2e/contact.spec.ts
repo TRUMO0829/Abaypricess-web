@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test"
+import { expect, test, type Browser, type Page } from "@playwright/test"
 
 const serviceTrigger = (page: Page) => page.locator("#service")
 const packageTrigger = (page: Page) => page.locator("#packageId")
@@ -116,5 +116,106 @@ test.describe("/contact хүсэлтийн маягт", () => {
     const body = decodeURIComponent(new URL(href!).searchParams.get("body") ?? "")
     expect(body).toContain("Багц: Стандарт")
     expect(body).not.toContain("standard")
+  })
+  test.describe("уулзалтын цаг (туршилтын календарь)", () => {
+    async function fillRequired(page: Page) {
+      await page.locator("#name").fill("Тест Хэрэглэгч")
+      await page.locator("#organization").fill("Тест ХХК")
+      await page.locator("#email").fill("test@example.mn")
+      await page.locator("#phone").fill("9911 2233")
+    }
+
+    const mailtoCalls = (page: Page) =>
+      page.evaluate(() => (window as unknown as { __mailtoCalls: string[] }).__mailtoCalls)
+
+    test("сул цаг сонгож илгээхэд уулзалт бүртгэгдэж, тэр цаг алга болно", async ({ page }, testInfo) => {
+      await page.goto("/contact?service=training")
+      const picker = page.getByRole("group", { name: "Уулзалтын цаг" })
+      await picker.getByRole("radio", { name: "30 минут" }).check()
+      const slots = picker.getByRole("radiogroup", { name: /^Сул цаг/ }).getByRole("radio")
+      await expect(slots.first()).toBeAttached()
+      // desktop, mobile project зэрэг ажиллахад нэг цагийг булаалдахгүй
+      const slot = testInfo.project.name === "mobile" ? slots.last() : slots.first()
+      const start = (await slot.getAttribute("value"))!
+      await slot.check()
+      await expect(picker.getByText("Сонгосон цаг")).toBeVisible()
+
+      await fillRequired(page)
+      await page.getByRole("button", { name: "Цаг захиалж, хүсэлт илгээх" }).click()
+
+      await expect(page.getByRole("status")).toContainText("Уулзалтын цаг баталгаажлаа")
+      expect(await mailtoCalls(page)).toHaveLength(0)
+
+      const res = await page.request.get("/api/booking/availability?duration=30")
+      const body = (await res.json()) as { days: { slots: string[] }[] }
+      expect(body.days.flatMap((day) => day.slots)).not.toContain(start)
+    })
+
+    /** Өөр browser context-оос (өөр хэрэглэгч) тухайн өдрийн ижил байрлалын цагийг захиална. */
+    async function bookFromAnotherUser(browser: Browser, dayIndex: number, pickLast: boolean) {
+      const context = await browser.newContext()
+      const other = await context.newPage()
+      await other.goto("/contact?service=laboratory")
+      const picker = other.getByRole("group", { name: "Уулзалтын цаг" })
+      await picker.getByRole("radiogroup", { name: "Өдөр" }).getByRole("radio").nth(dayIndex).check()
+      const slots = picker.getByRole("radiogroup", { name: /^Сул цаг/ }).getByRole("radio")
+      await (pickLast ? slots.last() : slots.first()).check()
+      await fillRequired(other)
+      await other.getByRole("button", { name: "Цаг захиалж, хүсэлт илгээх" }).click()
+      await expect(other.getByRole("status")).toContainText("Уулзалтын цаг баталгаажлаа")
+      await context.close()
+    }
+
+    async function selectSlot(page: Page, dayIndex: number, pickLast: boolean) {
+      const picker = page.getByRole("group", { name: "Уулзалтын цаг" })
+      await picker.getByRole("radiogroup", { name: "Өдөр" }).getByRole("radio").nth(dayIndex).check()
+      const slots = picker.getByRole("radiogroup", { name: /^Сул цаг/ }).getByRole("radio")
+      await (pickLast ? slots.last() : slots.first()).check()
+      await expect(picker.getByText("Сонгосон цаг")).toBeVisible()
+    }
+
+    test("хуучирсан цагаар илгээвэл сервер давхар захиалгыг зөвшөөрөхгүй", async ({ page, browser }, testInfo) => {
+      // Хуудас шинэчлэгдээгүй байх нөхцөл: эхний хариуг л үргэлж буцаана
+      let stale: string | undefined
+      await page.route("**/api/booking/availability**", async (route) => {
+        if (stale) return route.fulfill({ body: stale, contentType: "application/json" })
+        const response = await route.fetch()
+        stale = await response.text()
+        await route.fulfill({ response, body: stale })
+      })
+      await page.goto("/contact?service=laboratory")
+      const lastDay = (await page.getByRole("radiogroup", { name: "Өдөр" }).getByRole("radio").count()) - 1
+      const pickLast = testInfo.project.name === "mobile"
+      await selectSlot(page, lastDay, pickLast)
+      await fillRequired(page)
+
+      await bookFromAnotherUser(browser, lastDay, pickLast)
+
+      await page.getByRole("button", { name: "Цаг захиалж, хүсэлт илгээх" }).click()
+      await expect(page.getByText("Сонгосон цаг дөнгөж сая захиалагдсан байна")).toBeVisible()
+      await expect(page.getByRole("button", { name: "Хүсэлт илгээх", exact: true })).toBeVisible()
+      expect(await mailtoCalls(page)).toHaveLength(0)
+    })
+
+    test("сул цаг шинэчлэгдэхэд дүүрсэн цагийн сонголт цуцлагдана", async ({ page, browser }, testInfo) => {
+      await page.goto("/contact?service=laboratory")
+      const dayIndex = (await page.getByRole("radiogroup", { name: "Өдөр" }).getByRole("radio").count()) - 2
+      const pickLast = testInfo.project.name === "mobile"
+      await selectSlot(page, dayIndex, pickLast)
+
+      await bookFromAnotherUser(browser, dayIndex, pickLast)
+
+      // Табыг дахин нээх үеийн шинэчлэлтийг дуурайна
+      await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")))
+      await expect(page.getByText("Сонгосон цаг өөр хүнд захиалагдсан тул дахин сонгоно уу.")).toBeVisible()
+      await expect(page.getByRole("button", { name: "Хүсэлт илгээх", exact: true })).toBeVisible()
+    })
+
+    test("availability API буруу хугацааг хүлээж авахгүй", async ({ request }) => {
+      expect((await request.get("/api/booking/availability?duration=45")).status()).toBe(400)
+      const ok = await request.get("/api/booking/availability?duration=60")
+      expect(ok.status()).toBe(200)
+      expect(((await ok.json()) as { mode: string }).mode).toBe("mock")
+    })
   })
 })

@@ -21,5 +21,7 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
+    // Цаг захиалгыг Google-гүйгээр туршилтын календараар шалгана
+    env: { BOOKING_MOCK: "1" },
   },
 })

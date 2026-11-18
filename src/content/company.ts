@@ -40,6 +40,6 @@ export const company: Company = {
     phone: "+976 0000 0000",
     email: "info@adaptmanagement.mn",
     address: "Улаанбаатар хот",
-    hours: "Даваа–Баасан, 09:00–18:00",
+    hours: "Даваа–Баасан, 08:00–18:00",
   },
 }

@@ -1,19 +1,20 @@
 import { company } from "@/content/company"
-import { serviceOptions } from "@/content/contact"
-import { getService } from "@/content/services"
+import { createBooking, type BookingResult } from "@/lib/booking/actions"
+import { buildRequestLines } from "@/lib/request-summary"
 import type { RequestInput } from "@/lib/request-schema"
 
 export type SubmitResult =
   | { status: "sent" }
   | { status: "mailto"; href: string }
-  | { status: "error"; message: string }
+  | BookingResult
 
 /**
- * Хүсэлт илгээх цорын ганц цэг. Backend (Server Action / Resend) холбогдох хүртэл
- * хүсэлтийг "илгээгдсэн" гэж үзэхгүй — бөглөсөн мэдээллээр mailto холбоос буцаана.
- * Backend холбогдоход зөвхөн энэ функцийг сольж `{ status: "sent" }` буцаана; UI бүх төлөвийг дэмжинэ.
+ * Хүсэлт илгээх цорын ганц цэг.
+ * - Уулзалтын цаг сонгосон бол сервер дээр Google Calendar-т уулзалт үүсгэнэ (`booked` / `slot-taken`).
+ * - Цаггүй хүсэлтийг backend холбогдох хүртэл "илгээгдсэн" гэж үзэхгүй — бөглөсөн мэдээллээр mailto буцаана.
  */
-export async function submitRequest(data: RequestInput): Promise<SubmitResult> {
+export async function submitRequest(data: RequestInput, options: { honeypot?: string } = {}): Promise<SubmitResult> {
+  if (data.meetingStart) return createBooking(data, options.honeypot)
   try {
     return { status: "mailto", href: buildMailto(data) }
   } catch {
@@ -33,25 +34,8 @@ export function openMailClient(href: string): void {
   link.click()
 }
 
-/** Багцын id-г хүнд ойлгомжтой нэр болгоно: "standard" → "Стандарт". */
-export function getPackageName(service: RequestInput["service"], packageId?: string): string | undefined {
-  if (!packageId || service === "other") return undefined
-  return getService(service)?.packages.find((pkg) => pkg.id === packageId)?.name ?? packageId
-}
-
 export function buildMailto(data: RequestInput): string {
-  const serviceLabel = serviceOptions.find((o) => o.value === data.service)?.label ?? data.service
-  const packageName = getPackageName(data.service, data.packageId)
-  const lines = [
-    `Овог нэр: ${data.name}`,
-    `Байгууллага: ${data.organization}`,
-    data.position ? `Албан тушаал: ${data.position}` : null,
-    `Имэйл: ${data.email}`,
-    `Утас: ${data.phone}`,
-    `Үйлчилгээ: ${serviceLabel}`,
-    packageName ? `Багц: ${packageName}` : null,
-    data.message ? `\nНэмэлт мэдээлэл:\n${data.message}` : null,
-  ].filter(Boolean)
   const subject = `Үйлчилгээний хүсэлт — ${data.organization}`
-  return `mailto:${company.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(lines.join("\n"))}`
+  const body = buildRequestLines(data).join("\n")
+  return `mailto:${company.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }

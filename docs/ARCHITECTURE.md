@@ -27,7 +27,8 @@
 | `/services` | 3 үйлчилгээний тойм + нийт урсгал | ABAY-2 |
 | `/services/[slug]` | `training` · `laboratory` · `update` — Тойм: тайлбар, үр өгөөж, процесс, дараагийн алхам | ABAY-2 |
 | `/services/[slug]/{programs,trainers,pricing,report,faq}` | Дэд хуудас бүр нэг мэдээлэл: хөтөлбөр, сургагч багш (CV), үнийн санал, тайлангийн загвар (A4, хэвлэх), FAQ. Хөтөлбөр/багшгүй үйлчилгээнд тэр tab байхгүй | ABAY-2 |
-| `/contact` | Хүсэлтийн маягт (`?service=&package=` урьдчилж бөглөнө) | ABAY-3 |
+| `/contact` | Хүсэлтийн маягт (`?service=&package=` урьдчилж бөглөнө) + Google Calendar-ын сул цагаас уулзалт захиалах (`docs/BOOKING.md`) | ABAY-3 |
+| `/api/booking/availability` | Сул цагийн JSON (`?duration=30\|60`), cache-гүй | ABAY-3 |
 
 ## Хавтасны бүтэц
 
@@ -42,7 +43,7 @@ src/
 │  ├─ services/          үйлчилгээний component-ууд (ABAY-2)
 │  └─ contact/           маягт, холбоо барих мэдээлэл (ABAY-3)
 ├─ content/              бүх текст, үнэ, алхам — typed data (монгол)
-├─ lib/                  utils (cn), format (formatMNT), theme, brand (лого asset), request-schema, request
+├─ lib/                  utils (cn), format (formatMNT), theme, brand (лого asset), request-schema, request, booking/ (уулзалтын цаг)
 └─ types/content.ts      агуулгын гэрээ (contract)
 ```
 
@@ -71,6 +72,9 @@ src/
 - `dynamicParams`, `dynamic`, `revalidate` segment config ажиллахгүй. Тодорхойгүй slug → `notFound()`.
 - `PageProps<"/route">`, `LayoutProps<"/">` нь global төрөл (`next typegen` үүсгэнэ).
 
-## Маягт (одоогоор зөвхөн UI)
+## Маягт ба уулзалтын цаг
 
-`submitRequest()` (`src/lib/request.ts`) нь хүсэлт илгээх цорын ганц цэг. Backend холбогдох хүртэл `{ status: "mailto", href }` буцаадаг. UI нь "илгээгдлээ" гэж **худал мэдэгдэхгүй**, харин бөглөсөн мэдээллээр имэйл программыг нээнэ. Дараа нь зөвхөн энэ функцийг Server Action / Resend-ээр солино.
+`submitRequest()` (`src/lib/request.ts`) нь хүсэлт илгээх цорын ганц цэг.
+- **Уулзалтын цаг сонгосон:** Server Action `createBooking()` (`src/lib/booking/actions.ts`) сервер дээр дахин шалгаж Google Calendar-т уулзалт үүсгэнэ (`booked` / `slot-taken`).
+- **Цаггүй хүсэлт:** backend холбогдох хүртэл `{ status: "mailto", href }` буцаана. UI "илгээгдлээ" гэж **худал мэдэгдэхгүй**, бөглөсөн мэдээллээр имэйл программыг нээнэ.
+- Google-ийн тохиргоо, горимууд (Google / туршилтын / тохиргоогүй): `docs/BOOKING.md`.
