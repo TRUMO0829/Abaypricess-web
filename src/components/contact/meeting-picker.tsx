@@ -72,6 +72,8 @@ interface MeetingPickerProps {
   onModeChange: (value: MeetingMode) => void
   /** Утга өөрчлөгдөхөд сул цагийг шууд дахин ачаална (ж: "цаг дүүрсэн" хариу ирэхэд) */
   refreshKey: number
+  /** Календарьт уулзалт үүсгэж чадах эсэх (API key горимд `false` — цаг хүсэлтэд л орно) */
+  onCanBookChange?: (canBook: boolean) => void
 }
 
 export function MeetingPicker({
@@ -82,6 +84,7 @@ export function MeetingPicker({
   onDurationChange,
   onModeChange,
   refreshKey,
+  onCanBookChange,
 }: MeetingPickerProps) {
   const [load, setLoad] = useState<LoadState>({ state: "loading" })
   const [selectedDate, setSelectedDate] = useState<string>()
@@ -94,6 +97,7 @@ export function MeetingPicker({
       onStartChange("")
       setSlotLost(true)
     }
+    if (next.state === "ready") onCanBookChange?.(next.data.mode !== "google-key")
     setLoad(next)
   })
 
@@ -138,7 +142,9 @@ export function MeetingPicker({
           <CalendarClock className="size-4 text-primary" aria-hidden />
           {t.title} <span className="font-normal text-muted-foreground">{t.optional}</span>
         </p>
-        <p className="text-sm text-muted-foreground">{t.description}</p>
+        <p className="text-sm text-muted-foreground">
+          {load.state === "ready" && load.data.mode === "google-key" ? t.descriptionRequest : t.description}
+        </p>
       </div>
 
       {load.state === "ready" && load.data.mode === "mock" && (

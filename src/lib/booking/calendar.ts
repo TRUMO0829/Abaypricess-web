@@ -19,9 +19,11 @@ export interface CreatedEvent {
 }
 
 export interface CalendarProvider {
-  kind: "google" | "mock"
+  /** `google-key` — API key-ээр зөвхөн сул цаг уншина, уулзалт үүсгэхгүй (сонгосон цаг имэйлээр очно) */
+  kind: "google" | "google-key" | "mock"
   busy(range: Interval): Promise<Interval[]>
-  createEvent(event: NewEvent): Promise<CreatedEvent>
+  /** Байхгүй бол календарьт бичих эрхгүй (зөвхөн унших горим) */
+  createEvent?(event: NewEvent): Promise<CreatedEvent>
 }
 
 const MINUTE = 60_000
@@ -81,20 +83,31 @@ async function googleFetch<T>(env: GoogleEnv, path: string, body: unknown): Prom
   return (await res.json()) as T
 }
 
+interface FreeBusyResponse {
+  calendars: Record<string, { busy?: { start: string; end: string }[]; errors?: unknown[] }>
+}
+
+function freeBusyBody(range: Interval, calendarId: string) {
+  return {
+    timeMin: new Date(range.start).toISOString(),
+    timeMax: new Date(range.end).toISOString(),
+    items: [{ id: calendarId }],
+  }
+}
+
+function parseFreeBusy(json: FreeBusyResponse, calendarId: string): Interval[] {
+  const calendar = json.calendars[calendarId] ?? Object.values(json.calendars)[0]
+  // Календарь public биш эсвэл ID буруу бол Google `errors: [{ reason: "notFound" }]` буцаана
+  if (!calendar || calendar.errors?.length) throw new Error(`Google freeBusy: ${JSON.stringify(calendar?.errors)}`)
+  return (calendar.busy ?? []).map((b) => ({ start: Date.parse(b.start), end: Date.parse(b.end) }))
+}
+
 function googleProvider(env: GoogleEnv): CalendarProvider {
   return {
     kind: "google",
     async busy(range) {
-      const json = await googleFetch<{
-        calendars: Record<string, { busy?: { start: string; end: string }[]; errors?: unknown[] }>
-      }>(env, "/freeBusy", {
-        timeMin: new Date(range.start).toISOString(),
-        timeMax: new Date(range.end).toISOString(),
-        items: [{ id: env.calendarId }],
-      })
-      const calendar = json.calendars[env.calendarId] ?? Object.values(json.calendars)[0]
-      if (!calendar || calendar.errors?.length) throw new Error(`Google freeBusy: ${JSON.stringify(calendar?.errors)}`)
-      return (calendar.busy ?? []).map((b) => ({ start: Date.parse(b.start), end: Date.parse(b.end) }))
+      const json = await googleFetch<FreeBusyResponse>(env, "/freeBusy", freeBusyBody(range, env.calendarId))
+      return parseFreeBusy(json, env.calendarId)
     },
     async createEvent(event) {
       const { timeZone, utcOffsetMinutes } = bookingConfig
@@ -115,6 +128,34 @@ function googleProvider(env: GoogleEnv): CalendarProvider {
         }
       )
       return { id: json.id, meetLink: json.hangoutLink }
+    },
+  }
+}
+
+/* ── Google Calendar (API key, зөвхөн унших) ─────────────────────────────────── */
+
+/**
+ * API key нь зөвхөн **public** календарийг уншиж чадна (Calendar settings → "Make available to public",
+ * "See only free/busy" хангалттай). "primary" ажиллахгүй тул GOOGLE_CALENDAR_ID (ж: name@gmail.com) заавал.
+ */
+function googleKeyEnv(): { apiKey: string; calendarId: string } | null {
+  const { GOOGLE_CALENDAR_API_KEY, GOOGLE_CALENDAR_ID } = process.env
+  if (!GOOGLE_CALENDAR_API_KEY || !GOOGLE_CALENDAR_ID) return null
+  return { apiKey: GOOGLE_CALENDAR_API_KEY, calendarId: GOOGLE_CALENDAR_ID }
+}
+
+function googleKeyProvider({ apiKey, calendarId }: { apiKey: string; calendarId: string }): CalendarProvider {
+  return {
+    kind: "google-key",
+    async busy(range) {
+      const res = await fetch(`https://www.googleapis.com/calendar/v3/freeBusy?key=${encodeURIComponent(apiKey)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(freeBusyBody(range, calendarId)),
+        cache: "no-store",
+      })
+      if (!res.ok) throw new Error(`Google Calendar /freeBusy (API key): ${res.status} ${await res.text()}`)
+      return parseFreeBusy((await res.json()) as FreeBusyResponse, calendarId)
     },
   }
 }
@@ -154,12 +195,14 @@ const mockProvider: CalendarProvider = {
 }
 
 /**
- * Google-ийн env бүрэн бол бодит календарь, үгүй бол dev/e2e-д (BOOKING_MOCK=1) туршилтын календарь.
- * Production-д тохиргоогүй бол `null` — цаг захиалга нуугдаж, маягт имэйлээр ажилласаар байна.
+ * Сонгох дараалал: OAuth (унших + уулзалт үүсгэх) → API key (зөвхөн унших) → dev/e2e-д (BOOKING_MOCK=1)
+ * туршилтын календарь. Production-д тохиргоогүй бол `null` — цаг захиалга нуугдаж, маягт имэйлээр ажилласаар байна.
  */
 export function getCalendarProvider(): CalendarProvider | null {
   const env = googleEnv()
   if (env) return googleProvider(env)
+  const keyEnv = googleKeyEnv()
+  if (keyEnv) return googleKeyProvider(keyEnv)
   if (process.env.BOOKING_MOCK === "1" || process.env.NODE_ENV === "development") return mockProvider
   return null
 }

@@ -28,6 +28,8 @@ export const bookingContent = {
   title: "Уулзалтын цаг",
   optional: "(заавал биш)",
   description: "Google Calendar-аас шууд шинэчлэгдэх сул цагууд. Цаг сонговол урилга таны имэйлд очно.",
+  /** Календарь зөвхөн унших горимд (API key) — уулзалт автоматаар үүсэхгүй */
+  descriptionRequest: "Google Calendar-аас шууд шинэчлэгдэх сул цагууд. Сонгосон цаг тань хүсэлтэд орж, бид баталгаажуулна.",
   durationLabel: "Үргэлжлэх хугацаа",
   durations: { "30": "30 минут", "60": "1 цаг" } satisfies Record<MeetingDuration, string>,
   modeLabel: "Уулзалтын хэлбэр",
@@ -45,6 +47,9 @@ export const bookingContent = {
   slotLost: "Сонгосон цаг өөр хүнд захиалагдсан тул дахин сонгоно уу.",
   mockNotice: "Туршилтын горим: Google Calendar холбогдоогүй, жишээ цагууд харагдаж байна.",
   submitWithMeeting: "Цаг захиалж, хүсэлт илгээх",
+  submitWithMeetingRequest: "Сонгосон цагтай хүсэлт илгээх",
+  /** Имэйлийн биед: "Хүссэн уулзалтын цаг: Пүрэв, 11-р сарын 20, 10:00–11:00" */
+  mailMeetingLabel: "Хүссэн уулзалтын цаг",
   status: {
     booked: {
       title: "Уулзалтын цаг баталгаажлаа",

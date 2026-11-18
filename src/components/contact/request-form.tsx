@@ -84,6 +84,7 @@ export function RequestForm() {
   const [result, setResult] = useState<SubmitResult | null>(null)
   const [showSummary, setShowSummary] = useState(false)
   const [pickerRefresh, setPickerRefresh] = useState(0)
+  const [canBook, setCanBook] = useState(true)
   const statusRef = useRef<HTMLDivElement>(null)
 
   const form = useForm<RequestFormValues, unknown, RequestInput>({
@@ -466,6 +467,7 @@ export function RequestForm() {
             onDurationChange={(value) => setValue("meetingDuration", value)}
             onModeChange={(value) => setValue("meetingMode", value)}
             refreshKey={pickerRefresh}
+            onCanBookChange={setCanBook}
           />
           <FieldError errors={[errors.meetingStart]} className="mt-2" />
         </div>
@@ -479,7 +481,11 @@ export function RequestForm() {
           ) : (
             <>
               <Send data-icon="inline-start" aria-hidden />
-              {meetingStart ? bookingContent.submitWithMeeting : text.submit}
+              {meetingStart
+                ? canBook
+                  ? bookingContent.submitWithMeeting
+                  : bookingContent.submitWithMeetingRequest
+                : text.submit}
             </>
           )}
         </Button>

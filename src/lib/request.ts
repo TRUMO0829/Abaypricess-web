@@ -1,16 +1,13 @@
-import { company } from "@/content/company"
 import { createBooking, type BookingResult } from "@/lib/booking/actions"
-import { buildRequestLines } from "@/lib/request-summary"
+import { buildMailto } from "@/lib/request-summary"
 import type { RequestInput } from "@/lib/request-schema"
 
-export type SubmitResult =
-  | { status: "sent" }
-  | { status: "mailto"; href: string }
-  | BookingResult
+export type SubmitResult = { status: "sent" } | BookingResult
 
 /**
  * Хүсэлт илгээх цорын ганц цэг.
  * - Уулзалтын цаг сонгосон бол сервер дээр Google Calendar-т уулзалт үүсгэнэ (`booked` / `slot-taken`).
+ *   Календарь зөвхөн унших горимд (API key) байвал цаг сул эсэхийг шалгаад сонгосон цагтай mailto буцаана.
  * - Цаггүй хүсэлтийг backend холбогдох хүртэл "илгээгдсэн" гэж үзэхгүй — бөглөсөн мэдээллээр mailto буцаана.
  */
 export async function submitRequest(data: RequestInput, options: { honeypot?: string } = {}): Promise<SubmitResult> {
@@ -34,8 +31,4 @@ export function openMailClient(href: string): void {
   link.click()
 }
 
-export function buildMailto(data: RequestInput): string {
-  const subject = `Үйлчилгээний хүсэлт — ${data.organization}`
-  const body = buildRequestLines(data).join("\n")
-  return `mailto:${company.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-}
+export { buildMailto }

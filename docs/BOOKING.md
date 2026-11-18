@@ -33,6 +33,7 @@
 ### Горимууд
 
 - **Google:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` гурвуулаа тохируулагдсан үед.
+- **Google, зөвхөн унших (API key):** OAuth тохируулаагүй, `GOOGLE_CALENDAR_API_KEY` + `GOOGLE_CALENDAR_ID` байгаа үед. Сул цаг бодитоор харагдана, гэхдээ календарьт уулзалт **үүсэхгүй**: сервер цаг сул эсэхийг шалгаад, сонгосон цаг бүхий хүсэлтийн имэйлийг (mailto) нээнэ. Уулзах хүн цагийг өөрөө баталгаажуулна. Доорх «API key горим»-ыг үз.
 - **Туршилтын календарь:** dev горимд (`npm run dev`) эсвэл `BOOKING_MOCK=1` үед. Жишээ завгүй цагууд харагдах ба UI дээр "Туршилтын горим" гэж бичигдэнэ. e2e тест энэ горимоор ажиллана.
 - **Тохиргоогүй production:** цаг захиалгын хэсэг "түр боломжгүй" гэж харагдана. Маягт имэйлээр ажилласаар байна.
 
@@ -67,6 +68,25 @@
    # GOOGLE_CALENDAR_ID=   # хоосон бол үндсэн (primary) календарь
    ```
 7. **Шалгах:** `/contact` дээр "Туршилтын горим" бичиг алга болж, календарийн бодит сул цагууд харагдана.
+
+## API key горим (зөвхөн сул цаг, ≈5 минут)
+
+OAuth-ын оронд түр хэрэглэх хялбар хувилбар.
+
+1. Cloud Console → **Google Calendar API** асаалттай байх (дээрх 1–2-р алхам).
+2. Credentials → Create credentials → **API key**. Restrictions:
+   - API restrictions: **Google Calendar API** л сонгоно.
+   - Application restrictions: **None** (эсвэл серверийн IP). ⚠️ «Websites (HTTP referrers)» сонговол сервер талын хүсэлт 403 болно.
+3. Календарийг public болгох: Google Calendar → Settings → тухайн календарь → Access permissions → **Make available to public** → **See only free/busy (hide details)**. Уулзалтын нэр, агуулга ил гарахгүй, зөвхөн завгүй цаг харагдана.
+4. Settings → Integrate calendar → **Calendar ID**-г хуулна (үндсэн календарийнх нь Gmail хаяг).
+5. Env:
+   ```
+   GOOGLE_CALENDAR_API_KEY=...
+   GOOGLE_CALENDAR_ID=name@gmail.com
+   ```
+6. Шалгах: `npm run build && npm start` (dev горимд ч ажиллана) → `/contact`. Алдаа гарвал серверийн log-д `Google freeBusy: [{"reason":"notFound"}]` — календарь public биш эсвэл ID буруу.
+
+Дараа нь OAuth-ын гурван утгыг нэмбэл автоматаар бүрэн захиалгын горимд шилжинэ.
 
 ## Аюулгүй байдал
 

@@ -1,5 +1,8 @@
+import { bookingConfig, bookingContent } from "@/content/booking"
+import { company } from "@/content/company"
 import { serviceOptions } from "@/content/contact"
 import { getService } from "@/content/services"
+import { formatMeeting } from "@/lib/booking/format"
 import type { RequestInput } from "@/lib/request-schema"
 
 /** Багцын id-г хүнд ойлгомжтой нэр болгоно: "standard" → "Стандарт". */
@@ -25,4 +28,21 @@ export function buildRequestLines(data: RequestInput): string[] {
     packageName ? `Багц: ${packageName}` : null,
     data.message ? `\nНэмэлт мэдээлэл:\n${data.message}` : null,
   ].filter((line): line is string => line !== null)
+}
+
+/** Сонгосон уулзалтын цагийн мөрүүд (цаг сонгоогүй бол хоосон). */
+export function buildMeetingLines(data: RequestInput): string[] {
+  if (!data.meetingStart || !data.meetingDuration || !data.meetingMode) return []
+  const { minutes } = bookingConfig.durations[data.meetingDuration]
+  return [
+    "",
+    `${bookingContent.mailMeetingLabel}: ${formatMeeting(data.meetingStart, minutes)}`,
+    `Хэлбэр: ${bookingContent.modes[data.meetingMode]}`,
+  ]
+}
+
+export function buildMailto(data: RequestInput): string {
+  const subject = `${data.meetingStart ? "Уулзалтын хүсэлт" : "Үйлчилгээний хүсэлт"} — ${data.organization}`
+  const body = [...buildRequestLines(data), ...buildMeetingLines(data)].join("\n")
+  return `mailto:${company.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }

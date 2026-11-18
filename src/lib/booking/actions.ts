@@ -5,12 +5,14 @@ import { headers } from "next/headers"
 import { bookingConfig, bookingContent } from "@/content/booking"
 import { company } from "@/content/company"
 import { getCalendarProvider, isSlotFree } from "@/lib/booking/availability"
-import { buildRequestLines, getServiceLabel } from "@/lib/request-summary"
+import { buildMailto, buildRequestLines, getServiceLabel } from "@/lib/request-summary"
 import { requestSchema } from "@/lib/request-schema"
 
 export type BookingResult =
   | { status: "booked"; start: string; duration: number; mode: "online" | "office"; meetLink?: string }
   | { status: "slot-taken"; message: string }
+  /** Календарь зөвхөн унших горимд: сонгосон цагтай имэйлийг хэрэглэгч өөрөө илгээнэ */
+  | { status: "mailto"; href: string }
   | { status: "error"; message: string }
 
 const RATE_LIMIT = { max: 5, windowMs: 10 * 60_000 }
@@ -55,6 +57,9 @@ export async function createBooking(input: unknown, honeypot?: string): Promise<
     if (!(await isSlotFree(provider, data.meetingStart, data.meetingDuration))) {
       return { status: "slot-taken", message: bookingContent.status.slotTaken.description }
     }
+
+    // API key горим: календарьт бичих эрхгүй тул сонгосон цагийг хүсэлтийн имэйлд оруулна
+    if (!provider.createEvent) return { status: "mailto", href: buildMailto(data) }
 
     const { minutes } = bookingConfig.durations[data.meetingDuration]
     const start = Date.parse(data.meetingStart)
