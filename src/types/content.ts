@@ -16,11 +16,6 @@ export interface FaqItem {
   answer: string
 }
 
-export interface Stat {
-  value: string
-  label: string
-}
-
 export interface ValueItem {
   icon: LucideIcon
   title: string
@@ -48,7 +43,7 @@ export interface Company {
 
 /** Процесс диаграммын (docs/brief/process-diagram.png) нэг баган. */
 export interface FlowStage {
-  id: "intro" | ServiceSlug | "report"
+  id: ServiceSlug
   lane: string
   action: string
   document: string
@@ -99,12 +94,24 @@ export interface Service {
   benefits: string[]
   process: ProcessStep[]
   programs?: Program[]
+  /** Сургагч багш нар (Сургагч багш tab) */
+  trainers?: TeamMember[]
   packages: PricePackage[]
   /** Диаграмм дээрх баримтын нэр, ж: "Сургалтын үйлчилгээ, үнийн санал" */
   deliverable: string
   faq: FaqItem[]
 }
 
+export interface TeamMember {
+  name: string
+  role: string
+  /** `public/team/` доторх зураг, ж: "/team/bat.jpg". Байхгүй бол нэрийн эхний үсэг харагдана. */
+  photo?: string
+  summary: string
+  education: string[]
+  experience: string[]
+  expertise: string[]
+}
 export interface ReportMetric {
   label: string
   value: string

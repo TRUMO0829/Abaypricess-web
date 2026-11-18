@@ -14,7 +14,7 @@ export function CtaBanner({
   title = "Байгууллагынхаа дараагийн алхмыг хамтдаа төлөвлөе",
   description = "Хүсэлтээ илгээвэл манай зөвлөх 1 ажлын өдрийн дотор холбогдож, танд тохирох үйлчилгээ, үнийн саналыг танилцуулна.",
   primary = { label: "Хүсэлт илгээх", href: "/contact" },
-  secondary = { label: "Тайлангийн загвар үзэх", href: "/report" },
+  secondary = { label: "Үйлчилгээ үзэх", href: "/services" },
 }: CtaBannerProps) {
   return (
     // Dark горимд --primary цайвар тул дэвсгэрийг гүн цэнхэр (primary/15) болгоно

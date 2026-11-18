@@ -1,22 +1,18 @@
 import { expect, test } from "@playwright/test"
 
-test.describe("/report тайлангийн загвар", () => {
-  test("tab-аар загвар сэлгэнэ", async ({ page }) => {
-    await page.goto("/report")
-    await expect(page.getByRole("heading", { name: "Сургалтын үр дүнгийн тайлан" })).toBeVisible()
-    await page.getByRole("tab", { name: "Лаборатори" }).click()
-    await expect(page.getByRole("heading", { name: "Бизнес лабораторийн тайлан" })).toBeVisible()
-    await page.getByRole("tab", { name: "Лаборатори" }).press("ArrowRight")
-    await expect(page.getByRole("heading", { name: "Шинэчлэлийн үр дүнгийн тайлан" })).toBeVisible()
-  })
+const reports = [
+  { path: "/services/training/report", title: "Сургалтын үр дүнгийн тайлан" },
+  { path: "/services/laboratory/report", title: "Бизнес лабораторийн тайлан" },
+  { path: "/services/update/report", title: "Шинэчлэлийн үр дүнгийн тайлан" },
+]
 
-  for (const tab of ["Сургалт", "Лаборатори", "Шинэчлэл"]) {
+test.describe("үйлчилгээний тайлангийн загвар", () => {
+  for (const { path, title } of reports) {
     for (const media of ["screen", "print"] as const) {
-      test(`${tab} (${media}): агуулга, хөл цаасан дотор багтана`, async ({ page }) => {
-        await page.goto("/report")
-        await page.getByRole("tab", { name: tab }).click()
+      test(`${path} (${media}): агуулга, хөл цаасан дотор багтана`, async ({ page }) => {
+        await page.goto(path)
         await page.emulateMedia({ media })
-        const paper = page.locator("article").first()
+        const paper = page.getByRole("article", { name: title })
         const footer = paper.locator("footer")
         await expect(footer).toBeVisible()
         const p = (await paper.boundingBox())!
@@ -33,10 +29,10 @@ test.describe("/report тайлангийн загвар", () => {
   }
 
   test("хэвлэх үед зөвхөн цаас харагдана", async ({ page }) => {
-    await page.goto("/report")
+    await page.goto("/services/training/report")
     await page.emulateMedia({ media: "print" })
     await expect(page.getByRole("article", { name: "Сургалтын үр дүнгийн тайлан" })).toBeVisible()
-    await expect(page.getByRole("tablist")).toBeHidden()
+    await expect(page.getByRole("navigation", { name: "Үйлчилгээний цэс" })).toBeHidden()
     await expect(page.getByRole("button", { name: "Хэвлэх / PDF болгох" })).toBeHidden()
     await expect(page.locator("h1")).toBeHidden()
     await expect(page.locator("header").first()).toBeHidden()
@@ -44,7 +40,7 @@ test.describe("/report тайлангийн загвар", () => {
 
   test("dark горимд ч цаас цагаан байна", async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem("adapt-theme", "dark"))
-    await page.goto("/report")
+    await page.goto("/services/training/report")
     await expect(page.locator("html")).toHaveClass(/dark/)
     const paper = page.getByRole("article", { name: "Сургалтын үр дүнгийн тайлан" })
     const background = await paper.evaluate((el) => getComputedStyle(el).backgroundColor)

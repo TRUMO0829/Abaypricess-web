@@ -135,6 +135,33 @@ export const services: Service[] = [
         cta: "Үнийн санал авах",
       },
     ],
+    // TODO: бодит сургагч багш нарын нэр, зураг (public/team/), CV
+    trainers: [
+      {
+        name: "Овог Нэр",
+        role: "Удирдлага, манлайллын сургагч",
+        summary: "Дунд шатны удирдлагад зориулсан манлайллын хөтөлбөрүүдийг 10 гаруй жил заасан.",
+        education: ["Бизнесийн удирдлагын магистр (MBA)", "Олон улсын сургагч багшийн сертификат"],
+        experience: ["Ахлах сургагч — 20XX оноос", "Хүний нөөцийн менежер — 20XX–20XX"],
+        expertise: ["Манлайлал", "Баг удирдах ур чадвар"],
+      },
+      {
+        name: "Овог Нэр",
+        role: "Борлуулалт, харилцагчийн үйлчилгээний сургагч",
+        summary: "Борлуулалтын баг бэлтгэх, харилцагчийн туршлага сайжруулах сургалт явуулдаг.",
+        education: ["Маркетингийн магистр", "Бизнесийн удирдлагын бакалавр"],
+        experience: ["Сургагч — 20XX оноос", "Борлуулалтын менежер — 20XX–20XX"],
+        expertise: ["Борлуулалтын арга зүй", "Харилцагчийн үйлчилгээ"],
+      },
+      {
+        name: "Овог Нэр",
+        role: "Санхүү, үйл ажиллагааны сургагч",
+        summary: "Санхүүгийн бус удирдлагад зориулсан санхүүгийн мэдлэг, процессын сургалт заадаг.",
+        education: ["Санхүүгийн магистр", "Мэргэшсэн нягтлан бодогч (CPA)"],
+        experience: ["Сургагч — 20XX оноос", "Санхүүгийн шинжээч — 20XX–20XX"],
+        expertise: ["Санхүүгийн шинжилгээ", "Төсөв төлөвлөлт"],
+      },
+    ],
     deliverable: "Сургалтын үйлчилгээ, үнийн санал",
     faq: [
       {
@@ -365,12 +392,8 @@ export const servicesPageContent = {
     title: "Гурван алхам,",
     highlight: "нэг зорилго",
     description:
-      "Үйлчилгээ тус бүрийг дангаар нь авч болох ч дарааллаар нь авснаар мэдлэг, оношилгоо, хэрэгжилт нэг цогц болж, эцэст нь албан ёсны тайлангаар баталгаажна.",
+      "Үйлчилгээ тус бүрийг дангаар нь авч болох ч хамтад нь авснаар мэдлэг, оношилгоо, хэрэгжилт нэг цогц болно.",
     startingFrom: "Эхлэх үнэ",
-    stepLabel: "Алхам",
-    reportEyebrow: "Үр дүн",
-    reportDescription:
-      "Алхам бүрийн дүгнэлт, шинжилгээ, зөвлөмжийг албан ёсны тайлангаар хүлээлгэн өгнө.",
   },
   faq: {
     eyebrow: "Түгээмэл асуулт",
@@ -379,19 +402,39 @@ export const servicesPageContent = {
   },
 }
 
-/** `/services/[slug]` дэлгэрэнгүй хуудасны section-уудын текст. */
+/** `/services/[slug]` болон дэд хуудсуудын цэс (tab). `segment` хоосон бол тойм хуудас. */
+const serviceTabs = [
+  { id: "overview", segment: "", label: "Тойм" },
+  { id: "programs", segment: "programs", label: "Хөтөлбөр" },
+  { id: "trainers", segment: "trainers", label: "Сургагч багш" },
+  { id: "pricing", segment: "pricing", label: "Үнийн санал" },
+  { id: "report", segment: "report", label: "Тайлан" },
+  { id: "faq", segment: "faq", label: "Асуулт, хариулт" },
+] as const
+
+export type ServiceTabId = (typeof serviceTabs)[number]["id"]
+
+/** Тухайн үйлчилгээнд агуулгатай tab-ууд (хөтөлбөр, багшгүй бол тэр tab харагдахгүй). */
+export function getServiceTabs(service: Service) {
+  return serviceTabs
+    .filter((tab) => {
+      if (tab.id === "programs") return (service.programs?.length ?? 0) > 0
+      if (tab.id === "trainers") return (service.trainers?.length ?? 0) > 0
+      return true
+    })
+    .map((tab) => ({
+      ...tab,
+      href: tab.segment ? `/services/${service.slug}/${tab.segment}` : `/services/${service.slug}`,
+    }))
+}
+
+/** `/services/[slug]` болон дэд хуудсуудын текст. */
 export const serviceDetailContent = {
   hero: {
     benefitsTitle: "Таны авах үр өгөөж",
     deliverableLabel: "Хүлээлгэн өгөх баримт",
-    flowLabel: "Үйлчилгээний урсгал",
+    tabsLabel: "Үйлчилгээний цэс",
   },
-  sectionNav: [
-    { id: "process", label: "Процесс" },
-    { id: "programs", label: "Хөтөлбөр" },
-    { id: "pricing", label: "Үнийн санал" },
-    { id: "faq", label: "Асуулт, хариулт" },
-  ],
   process: {
     eyebrow: "Дэлгэрэнгүй процесс",
     title: "Ажил хэрхэн",
@@ -417,9 +460,18 @@ export const serviceDetailContent = {
     title: "Асуулт,",
     highlight: "хариулт",
   },
+  trainers: {
+    eyebrow: "Сургагч багш",
+    title: "Сургалтыг удирдах",
+    highlight: "багш нар",
+    description: "Сургалт бүрийг тухайн чиглэлээр олон жил ажилласан, олон улсын сертификаттай багш нар заана.",
+  },
+  report: {
+    eyebrow: "Тайлан",
+    title: "Тайлангийн",
+    highlight: "загвар",
+  },
   next: {
     eyebrow: "Дараагийн алхам",
-    reportDescription:
-      "Үйлчилгээ бүрийн төгсгөлд дүгнэлт, шинжилгээ, зөвлөмжийг багтаасан албан ёсны тайлан хүлээлгэн өгнө.",
   },
 }

@@ -1,17 +1,9 @@
-import { BookOpen, Building2, FileBarChart, FlaskConical, RefreshCw } from "lucide-react"
+import { BookOpen, FlaskConical, RefreshCw } from "lucide-react"
 
 import type { FlowStage } from "@/types/content"
 
-// docs/brief/process-diagram.png-ийн 5 баганыг дарааллаар нь
+// Үндсэн 3 үйлчилгээ (docs/brief/process-diagram.png-ийн дунд 3 багана)
 export const flowStages: FlowStage[] = [
-  {
-    id: "intro",
-    lane: "Танилцуулга",
-    action: "Байгууллагаа танилцуулах",
-    document: "Байгууллагын танилцуулга",
-    href: "/about",
-    icon: Building2,
-  },
   {
     id: "training",
     lane: "Business Training Service",
@@ -36,22 +28,10 @@ export const flowStages: FlowStage[] = [
     href: "/services/update",
     icon: RefreshCw,
   },
-  {
-    id: "report",
-    lane: "Тайлан",
-    action: "Тайлан хүлээлгэж өгөх",
-    document: "Тайлангийн загвартай танилцах",
-    href: "/report",
-    icon: FileBarChart,
-  },
 ]
 
-/** Диаграммын "Эхлэх" / "Дуусах" тэмдэглэгээ ба шошго */
+/** Диаграммын шошго */
 export const flowLabels = {
-  start: "Эхлэх",
-  end: "Дуусах",
-  step: "Алхам",
   action: "Үйлдэл",
   document: "Баримт",
-  detailedProcess: "Дэлгэрэнгүй процесс",
 }

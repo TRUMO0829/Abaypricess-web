@@ -107,19 +107,14 @@ export const reportTemplates: ReportTemplate[] = [
   },
 ]
 
-/** `/report` хуудасны текст. */
+export function getReportTemplate(slug: ServiceSlug): ReportTemplate | undefined {
+  return reportTemplates.find((template) => template.service === slug)
+}
+
+/** `/services/[slug]/report` хуудасны текст. */
 export const reportPageContent = {
-  header: {
-    title: "Тайлангийн",
-    highlight: "загвар",
-    description:
-      "Үйлчилгээ бүрийн төгсгөлд хүлээлгэн өгөх албан ёсны тайлангийн бүтэцтэй танилцана уу. Доорх нь жишээ загвар бөгөөд бодит тайлан танай байгууллагын өгөгдлөөр бэлтгэгдэнэ.",
-  },
-  tabsLabel: "Тайлангийн загвар сонгох",
-  tabLabels: { training: "Сургалт", laboratory: "Лаборатори", update: "Шинэчлэл" } satisfies Record<
-    ServiceSlug,
-    string
-  >,
+  description:
+    "Үйлчилгээний төгсгөлд хүлээлгэн өгөх албан ёсны тайлангийн бүтэц. Доорх нь жишээ загвар бөгөөд бодит тайлан танай байгууллагын өгөгдлөөр бэлтгэгдэнэ.",
   printLabel: "Хэвлэх / PDF болгох",
   printHint: "Хэвлэх цонхонд «PDF болгож хадгалах»-ыг сонговол PDF файл үүснэ.",
   paper: {
@@ -133,18 +128,5 @@ export const reportPageContent = {
     metricsTitle: "Гол үзүүлэлтүүд",
     footer: "Энэхүү баримт нь жишээ загвар бөгөөд бодит харилцагчийн мэдээлэл агуулаагүй болно.",
     page: "Хуудас 1",
-  },
-  aside: {
-    title: "Тайлан юу агуулдаг вэ",
-    items: [
-      { title: "Ерөнхий дүгнэлт", description: "Удирдлагад зориулсан нэг хуудасны товчлол." },
-      { title: "Тоон үзүүлэлт", description: "Өмнөх / дараах харьцуулалт, график, хүснэгт." },
-      { title: "Шинжилгээ", description: "Илэрсэн асуудал, шалтгаан, нөлөөлөл." },
-      { title: "Зөвлөмж ба дараагийн алхам", description: "Хариуцагч, хугацаатай хэрэгжүүлэх төлөвлөгөө." },
-    ],
-    ctaTitle: "Ийм тайлан авахыг хүсэж байна уу?",
-    ctaDescription: "Үйлчилгээгээ сонгоод хүсэлт илгээхэд манай зөвлөх тантай холбогдоно.",
-    ctaLabel: "Үйлчилгээ захиалах",
-    servicesLabel: "Үйлчилгээний дэлгэрэнгүй",
   },
 }

@@ -2,7 +2,6 @@ import type { NavItem } from "@/types/content"
 
 export const mainNav: NavItem[] = [
   { label: "Нүүр", href: "/" },
-  { label: "Бидний тухай", href: "/about" },
   {
     label: "Үйлчилгээ",
     href: "/services",
@@ -24,7 +23,6 @@ export const mainNav: NavItem[] = [
       },
     ],
   },
-  { label: "Тайлангийн загвар", href: "/report" },
   { label: "Холбоо барих", href: "/contact" },
 ]
 
@@ -36,9 +34,7 @@ export const footerNav = {
   company: {
     title: "Компани",
     items: [
-      { label: "Бидний тухай", href: "/about" },
       { label: "Бүх үйлчилгээ", href: "/services" },
-      { label: "Тайлангийн загвар", href: "/report" },
       { label: "Хүсэлт илгээх", href: "/contact" },
     ] satisfies NavItem[],
   },

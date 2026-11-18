@@ -1,101 +1,67 @@
-import type { Metadata } from "next"
-import { notFound } from "next/navigation"
-import { Suspense } from "react"
+import { CheckCircle2, FileText } from "lucide-react"
 
 import { NextStep } from "@/components/services/next-step"
 import { ProcessStepper } from "@/components/services/process-stepper"
-import { ProgramList } from "@/components/services/program-list"
-import { ServiceHero } from "@/components/services/service-hero"
-import { ServicePageSkeleton } from "@/components/services/service-page-skeleton"
-import { ServicePricing } from "@/components/services/service-pricing"
-import { CtaBanner } from "@/components/shared/cta-banner"
-import { FaqAccordion } from "@/components/shared/faq-accordion"
-import { SectionHeading } from "@/components/shared/section-heading"
-import { getService, serviceDetailContent, services } from "@/content/services"
+import { ServiceRoute, ServiceSection, serviceMetadata } from "@/components/services/service-route"
+import { getNextService, serviceDetailContent } from "@/content/services"
+import type { Service } from "@/types/content"
 
-export function generateStaticParams() {
-  return services.map((service) => ({ slug: service.slug }))
+export function generateMetadata({ params }: PageProps<"/services/[slug]">) {
+  return serviceMetadata(params)
 }
 
-export async function generateMetadata({ params }: PageProps<"/services/[slug]">): Promise<Metadata> {
-  const { slug } = await params
-  const service = getService(slug)
-  return service ? { title: service.name, description: service.shortDescription } : {}
-}
-
-// params нь URL өгөгдөл тул Suspense дотор уншина — App Shell бүх slug-д нэг байж, навигаци шууд эхэлнэ.
-// Мэдэгдэж буй slug-ууд generateStaticParams-аар бүрэн prerender хийгдэнэ.
-export default function ServicePage({ params }: PageProps<"/services/[slug]">) {
-  return (
-    <Suspense fallback={<ServicePageSkeleton />}>
-      <ServicePageContent params={params} />
-    </Suspense>
-  )
-}
-
-async function ServicePageContent({ params }: Pick<PageProps<"/services/[slug]">, "params">) {
-  const { slug } = await params
-  const service = getService(slug)
-  if (!service) notFound()
-
-  const { process, programs, pricing, faq } = serviceDetailContent
+function Overview({ service }: { service: Service }) {
+  const { hero, process } = serviceDetailContent
 
   return (
     <>
-      <ServiceHero service={service} />
-
-      <section id="process" className="scroll-mt-20 py-20 md:py-28">
-        <div className="container flex flex-col gap-12">
-          <SectionHeading
-            eyebrow={process.eyebrow}
-            title={process.title}
-            highlight={process.highlight}
-            description={process.description}
-          />
-          <ProcessStepper steps={service.process} label={`${service.name}: процессын алхмууд`} />
+      <section className="py-16 md:py-20">
+        <div className="container grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start lg:gap-16">
+          <p className="text-lg text-pretty text-muted-foreground md:text-xl">{service.description}</p>
+          <aside className="flex flex-col gap-5 rounded-xl bg-card p-6 ring-1 ring-foreground/10">
+            <h2 className="text-base font-semibold">{hero.benefitsTitle}</h2>
+            <ul className="flex flex-col gap-3">
+              {service.benefits.map((benefit) => (
+                <li key={benefit} className="flex items-start gap-3 text-sm">
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                  <span>{benefit}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex items-start gap-3 rounded-lg bg-primary/5 p-4 text-sm ring-1 ring-primary/15">
+              <FileText className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+              <div>
+                <p className="text-xs text-muted-foreground">{hero.deliverableLabel}</p>
+                <p className="font-medium">{service.deliverable}</p>
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
 
-      {service.programs && service.programs.length > 0 && (
-        <section id="programs" className="scroll-mt-20 border-t py-20 md:py-28">
-          <div className="container flex flex-col gap-12">
-            <SectionHeading
-              eyebrow={programs.eyebrow}
-              title={programs.title}
-              highlight={programs.highlight}
-              description={programs.description}
-            />
-            <ProgramList programs={service.programs} />
+      <div className="border-t">
+        <ServiceSection
+          id="process"
+          eyebrow={process.eyebrow}
+          title={process.title}
+          highlight={process.highlight}
+          description={process.description}
+        >
+          <ProcessStepper steps={service.process} label={`${service.name}: процессын алхмууд`} />
+        </ServiceSection>
+      </div>
+
+      {getNextService(service.slug) && (
+        <section aria-label="Дараагийн алхам" className="border-t bg-muted/40 py-14 md:py-16">
+          <div className="container max-w-3xl">
+            <NextStep slug={service.slug} />
           </div>
         </section>
       )}
-
-      <section id="pricing" className="scroll-mt-20 border-t bg-muted/40 py-20 md:py-28">
-        <div className="container flex flex-col gap-12">
-          <SectionHeading
-            eyebrow={pricing.eyebrow}
-            title={pricing.title}
-            highlight={pricing.highlight}
-            description={pricing.description}
-          />
-          <ServicePricing service={service} />
-        </div>
-      </section>
-
-      <section id="faq" className="scroll-mt-20 py-20 md:py-28">
-        <div className="container flex max-w-3xl flex-col gap-10">
-          <SectionHeading eyebrow={faq.eyebrow} title={faq.title} highlight={faq.highlight} />
-          <FaqAccordion items={service.faq} />
-        </div>
-      </section>
-
-      <section aria-label="Дараагийн алхам" className="border-t bg-muted/40 py-14 md:py-16">
-        <div className="container max-w-3xl">
-          <NextStep slug={service.slug} />
-        </div>
-      </section>
-
-      <CtaBanner primary={{ label: "Хүсэлт илгээх", href: `/contact?service=${service.slug}` }} />
     </>
   )
+}
+
+export default function ServicePage({ params }: PageProps<"/services/[slug]">) {
+  return <ServiceRoute params={params}>{(service) => <Overview service={service} />}</ServiceRoute>
 }

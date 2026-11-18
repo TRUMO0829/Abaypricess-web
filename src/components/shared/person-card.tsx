@@ -1,0 +1,78 @@
+import Image from "next/image"
+
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { cvLabels as t } from "@/content/team"
+import { cn } from "@/lib/utils"
+import type { TeamMember } from "@/types/content"
+
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase()
+
+function CvList({ label, items }: { label: string; items: string[] }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <h4 className="text-xs font-semibold tracking-wide text-primary uppercase">{label}</h4>
+      <ul className="flex flex-col gap-1 text-sm text-muted-foreground">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2">
+            <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-primary/60" />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/** Багийн гишүүн, сургагч багшийн карт: зураг, нэр, албан тушаал, задардаг CV. */
+function PersonCard({ person, id }: { person: TeamMember; id: string }) {
+  return (
+    <li className="flex flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
+      <div className="relative flex aspect-video items-center justify-center bg-linear-to-br from-primary/15 to-primary/5 md:aspect-[4/3]">
+        {person.photo ? (
+          <Image
+            src={person.photo}
+            alt={person.name}
+            fill
+            sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+            className="object-cover"
+          />
+        ) : (
+          <span aria-hidden className="font-heading text-4xl font-bold text-primary/70">
+            {initials(person.name)}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col gap-2 p-5">
+        <h3 className="text-lg font-semibold">{person.name}</h3>
+        <p className="text-sm font-medium text-primary">{person.role}</p>
+        <p className="text-sm text-muted-foreground md:min-h-[4lh]">{person.summary}</p>
+      </div>
+      <Accordion type="single" collapsible className="mt-auto border-t px-5">
+        <AccordionItem value={id} className="border-b-0">
+          <AccordionTrigger className="text-sm">{t.cv}</AccordionTrigger>
+          <AccordionContent className="flex flex-col gap-4">
+            <CvList label={t.education} items={person.education} />
+            <CvList label={t.experience} items={person.experience} />
+            <CvList label={t.expertise} items={person.expertise} />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </li>
+  )
+}
+
+export function PersonGrid({ people, className }: { people: TeamMember[]; className?: string }) {
+  return (
+    <ul className={cn("grid items-start gap-6 md:grid-cols-2 lg:grid-cols-4", className)}>
+      {people.map((person, index) => (
+        <PersonCard key={index} person={person} id={`cv-${index}`} />
+      ))}
+    </ul>
+  )
+}

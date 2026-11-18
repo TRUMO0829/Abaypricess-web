@@ -16,7 +16,7 @@ interface PageHeaderProps {
   breadcrumbs?: Crumb[]
 }
 
-/** Дотоод хуудасны (about, services, report, contact) дээд хэсэг. */
+/** Дотоод хуудасны (about, services, contact) дээд хэсэг. */
 export function PageHeader({ title, highlight, description, eyebrow, breadcrumbs }: PageHeaderProps) {
   return (
     <section className="border-b bg-muted/40">

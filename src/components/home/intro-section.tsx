@@ -1,10 +1,6 @@
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
-
 import { MissionVision } from "@/components/home/mission-vision"
 import { ValuesGrid } from "@/components/home/values-grid"
 import { SectionHeading } from "@/components/shared/section-heading"
-import { Button } from "@/components/ui/button"
 import { company } from "@/content/company"
 import { homeSections } from "@/content/home"
 
@@ -18,12 +14,6 @@ export function IntroSection() {
           <div className="flex flex-col items-start gap-6">
             <SectionHeading align="start" eyebrow={t.eyebrow} title={t.title} highlight={t.highlight} />
             <p className="text-lg text-pretty text-muted-foreground">{company.intro}</p>
-            <Button asChild variant="outline">
-              <Link href="/about">
-                {t.more}
-                <ArrowRight data-icon="inline-end" />
-              </Link>
-            </Button>
           </div>
           <MissionVision missionLabel={t.missionLabel} visionLabel={t.visionLabel} />
         </div>
