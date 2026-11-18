@@ -74,7 +74,9 @@ test.describe("/contact хүсэлтийн маягт", () => {
     await page.goto("/contact")
     await page.getByRole("button", { name: "Хүсэлт илгээх" }).click()
 
-    await expect(page.getByText("Овог нэрээ оруулна уу")).toBeVisible()
+    await expect(page.getByText("Нэрээ оруулна уу", { exact: true })).toBeVisible()
+    await expect(page.getByText("Албан тушаалаа оруулна уу")).toBeVisible()
+    await expect(page.locator("#position")).toHaveAttribute("aria-invalid", "true")
     await expect(page.getByText("Имэйл хаягаа оруулна уу")).toBeVisible()
     await expect(page.getByText("Утасны дугаараа оруулна уу")).toBeVisible()
     await expect(page.getByText("Үйлчилгээгээ сонгоно уу", { exact: true })).toBeVisible()
@@ -99,6 +101,7 @@ test.describe("/contact хүсэлтийн маягт", () => {
     await page.goto("/contact?service=training&package=standard")
     await page.locator("#name").fill("Тест Хэрэглэгч")
     await page.locator("#organization").fill("Тест ХХК")
+    await page.locator("#position").fill("Захирал")
     await page.locator("#email").fill("test@example.mn")
     await page.locator("#phone").fill("9911 2233")
     // Stub идэвхгүй бол submit хийхгүй (бодит Mail нээгдэхээс сэргийлнэ)
@@ -121,6 +124,8 @@ test.describe("/contact хүсэлтийн маягт", () => {
     async function fillRequired(page: Page) {
       await page.locator("#name").fill("Тест Хэрэглэгч")
       await page.locator("#organization").fill("Тест ХХК")
+      await page.locator("#position").fill("Захирал")
+    await page.locator("#position").fill("Захирал")
       await page.locator("#email").fill("test@example.mn")
       await page.locator("#phone").fill("9911 2233")
     }
@@ -131,13 +136,14 @@ test.describe("/contact хүсэлтийн маягт", () => {
     test("сул цаг сонгож илгээхэд уулзалт бүртгэгдэж, тэр цаг алга болно", async ({ page }, testInfo) => {
       await page.goto("/contact?service=training")
       const picker = page.getByRole("group", { name: "Уулзалтын цаг" })
-      await picker.getByRole("radio", { name: "30 минут" }).check()
       const slots = picker.getByRole("radiogroup", { name: /^Сул цаг/ }).getByRole("radio")
       await expect(slots.first()).toBeAttached()
       // desktop, mobile project зэрэг ажиллахад нэг цагийг булаалдахгүй
       const slot = testInfo.project.name === "mobile" ? slots.last() : slots.first()
       const start = (await slot.getAttribute("value"))!
       await slot.check()
+      // Дуусах цаг: 30 минутын уулзалт
+      await picker.getByRole("radiogroup", { name: "Дуусах цаг" }).getByRole("radio", { name: /30 минут/ }).check()
       await expect(picker.getByText("Сонгосон цаг")).toBeVisible()
 
       await fillRequired(page)
@@ -146,9 +152,9 @@ test.describe("/contact хүсэлтийн маягт", () => {
       await expect(page.getByRole("status")).toContainText("Уулзалтын цаг баталгаажлаа")
       expect(await mailtoCalls(page)).toHaveLength(0)
 
-      const res = await page.request.get("/api/booking/availability?duration=30")
-      const body = (await res.json()) as { days: { slots: string[] }[] }
-      expect(body.days.flatMap((day) => day.slots)).not.toContain(start)
+      const res = await page.request.get("/api/booking/availability")
+      const body = (await res.json()) as { days: { slots: { start: string }[] }[] }
+      expect(body.days.flatMap((day) => day.slots.map((s) => s.start))).not.toContain(start)
     })
 
     /** Өөр browser context-оос (өөр хэрэглэгч) тухайн өдрийн ижил байрлалын цагийг захиална. */
@@ -211,11 +217,35 @@ test.describe("/contact хүсэлтийн маягт", () => {
       await expect(page.getByRole("button", { name: "Хүсэлт илгээх", exact: true })).toBeVisible()
     })
 
-    test("availability API буруу хугацааг хүлээж авахгүй", async ({ request }) => {
-      expect((await request.get("/api/booking/availability?duration=45")).status()).toBe(400)
-      const ok = await request.get("/api/booking/availability?duration=60")
+    test("очиж уулзах үед хаяг заавал, уулзалтад хаяг бичигдэнэ", async ({ page }, testInfo) => {
+      await page.goto("/contact?service=update")
+      const picker = page.getByRole("group", { name: "Уулзалтын цаг" })
+      await expect(picker.getByRole("radiogroup", { name: "Уулзах газар" }).getByRole("radio")).toHaveCount(3)
+      await picker.getByRole("radio", { name: "Очиж уулзах" }).check()
+
+      // Бусад тест (эхний/сүүлийн өдөр, эхний/сүүлийн цаг)-тэй давхцахгүй цаг
+      await picker.getByRole("radiogroup", { name: "Өдөр" }).getByRole("radio").nth(1).check()
+      const slots = picker.getByRole("radiogroup", { name: /^Сул цаг/ }).getByRole("radio")
+      await slots.nth(testInfo.project.name === "mobile" ? 3 : 2).check()
+      await fillRequired(page)
+
+      await page.getByRole("button", { name: "Цаг захиалж, хүсэлт илгээх" }).click()
+      await expect(page.getByText("Уулзах хаягаа оруулна уу")).toBeVisible()
+
+      await page.locator("#meetingAddress").fill("Сүхбаатар дүүрэг, Тест төв, 5 давхар")
+      await page.getByRole("button", { name: "Цаг захиалж, хүсэлт илгээх" }).click()
+      await expect(page.getByRole("status")).toContainText("Уулзалтын цаг баталгаажлаа")
+      await expect(page.getByRole("status")).toContainText("очиж уулзана: Сүхбаатар дүүрэг, Тест төв, 5 давхар")
+    })
+
+    test("availability API эхлэх цаг бүрт багтах хамгийн урт хугацааг өгнө", async ({ request }) => {
+      const ok = await request.get("/api/booking/availability")
       expect(ok.status()).toBe(200)
-      expect(((await ok.json()) as { mode: string }).mode).toBe("mock")
+      const body = (await ok.json()) as { mode: string; days: { slots: { start: string; maxMinutes: number }[] }[] }
+      expect(body.mode).toBe("mock")
+      const slots = body.days.flatMap((day) => day.slots)
+      expect(slots.length).toBeGreaterThan(0)
+      expect(slots.every((s) => [30, 45, 60].includes(s.maxMinutes))).toBe(true)
     })
   })
 })

@@ -23,6 +23,7 @@ export const mainNav: NavItem[] = [
       },
     ],
   },
+  { label: "Асуулт хариулт", href: "/assessment" },
   { label: "Холбоо барих", href: "/contact" },
 ]
 
@@ -35,6 +36,7 @@ export const footerNav = {
     title: "Компани",
     items: [
       { label: "Бүх үйлчилгээ", href: "/services" },
+      { label: "Байгууллагын үнэлгээ", href: "/assessment" },
       { label: "Хүсэлт илгээх", href: "/contact" },
     ] satisfies NavItem[],
   },

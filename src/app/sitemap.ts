@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...services.flatMap((service) =>
       getServiceTabs(service).map((tab) => ({ path: tab.href, priority: tab.segment ? 0.6 : 0.8 }))
     ),
+    { path: "/assessment", priority: 0.7 },
     { path: "/contact", priority: 0.7 },
   ]
 

@@ -20,7 +20,7 @@ export const requestFormContent = {
   title: "Хүсэлтийн маягт",
   requiredNote: "* тэмдэгтэй талбарыг заавал бөглөнө.",
   fields: {
-    name: { label: "Овог нэр", placeholder: "Бат-Эрдэнэ Болд" },
+    name: { label: "Нэр", placeholder: "Бат-Эрдэнэ" },
     organization: { label: "Байгууллага", placeholder: "Байгууллагын нэр" },
     position: { label: "Албан тушаал", placeholder: "Ж: Хүний нөөцийн менежер" },
     email: { label: "Имэйл", placeholder: "name@company.mn" },

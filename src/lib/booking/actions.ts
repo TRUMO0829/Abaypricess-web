@@ -2,14 +2,14 @@
 
 import { headers } from "next/headers"
 
-import { bookingConfig, bookingContent } from "@/content/booking"
+import { bookingContent } from "@/content/booking"
 import { company } from "@/content/company"
 import { getCalendarProvider, isSlotFree } from "@/lib/booking/availability"
-import { buildMailto, buildRequestLines, getServiceLabel } from "@/lib/request-summary"
+import { buildMailto, buildMeetingLines, buildRequestLines, getServiceLabel } from "@/lib/request-summary"
 import { requestSchema } from "@/lib/request-schema"
 
 export type BookingResult =
-  | { status: "booked"; start: string; duration: number; mode: "online" | "office"; meetLink?: string }
+  | { status: "booked"; start: string; duration: number; mode: "online" | "office" | "visit"; address?: string; meetLink?: string }
   | { status: "slot-taken"; message: string }
   /** Календарь зөвхөн унших горимд: сонгосон цагтай имэйлийг хэрэглэгч өөрөө илгээнэ */
   | { status: "mailto"; href: string }
@@ -61,16 +61,21 @@ export async function createBooking(input: unknown, honeypot?: string): Promise<
     // API key горим: календарьт бичих эрхгүй тул сонгосон цагийг хүсэлтийн имэйлд оруулна
     if (!provider.createEvent) return { status: "mailto", href: buildMailto(data) }
 
-    const { minutes } = bookingConfig.durations[data.meetingDuration]
+    const minutes = Number(data.meetingDuration)
     const start = Date.parse(data.meetingStart)
     const event = await provider.createEvent({
       start,
       end: start + minutes * 60_000,
       summary: `Уулзалт: ${data.organization} — ${getServiceLabel(data.service)}`,
-      description: [...buildRequestLines(data), "", `Хэлбэр: ${bookingContent.modes[data.meetingMode]}`].join("\n"),
+      description: [...buildRequestLines(data), ...buildMeetingLines(data)].join("\n"),
       attendee: { email: data.email, name: data.name },
       mode: data.meetingMode,
-      location: data.meetingMode === "office" ? company.contact.address : undefined,
+      location:
+        data.meetingMode === "office"
+          ? company.contact.address
+          : data.meetingMode === "visit"
+            ? data.meetingAddress
+            : undefined,
     })
 
     return {
@@ -78,6 +83,7 @@ export async function createBooking(input: unknown, honeypot?: string): Promise<
       start: data.meetingStart,
       duration: minutes,
       mode: data.meetingMode,
+      address: data.meetingMode === "visit" ? data.meetingAddress : undefined,
       meetLink: event.meetLink,
     }
   } catch (error) {

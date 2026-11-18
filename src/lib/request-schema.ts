@@ -30,8 +30,8 @@ export const requestSchema = z
     name: z
       .string()
       .trim()
-      .min(1, { error: "Овог нэрээ оруулна уу" })
-      .min(2, { error: "Овог нэр хэт богино байна" })
+      .min(1, { error: "Нэрээ оруулна уу" })
+      .min(2, { error: "Нэр хэт богино байна" })
       .max(100, { error: "100 тэмдэгтээс хэтрэхгүй" }),
     organization: z
       .string()
@@ -39,7 +39,12 @@ export const requestSchema = z
       .min(1, { error: "Байгууллагын нэрээ оруулна уу" })
       .min(2, { error: "Байгууллагын нэр хэт богино байна" })
       .max(150, { error: "150 тэмдэгтээс хэтрэхгүй" }),
-    position: optionalText(100, "100 тэмдэгтээс хэтрэхгүй"),
+    position: z
+      .string()
+      .trim()
+      .min(1, { error: "Албан тушаалаа оруулна уу" })
+      .min(2, { error: "Албан тушаал хэт богино байна" })
+      .max(100, { error: "100 тэмдэгтээс хэтрэхгүй" }),
     email: z
       .string()
       .trim()
@@ -64,10 +69,15 @@ export const requestSchema = z
       .refine((value) => !value || MEETING_START_REGEX.test(value), { error: "Уулзалтын цаг буруу байна" }),
     meetingDuration: z.enum(meetingDurationValues).optional(),
     meetingMode: z.enum(meetingModeValues).optional(),
+    /** «Очиж уулзах» үед заавал */
+    meetingAddress: optionalText(200, "200 тэмдэгтээс хэтрэхгүй"),
   })
   .superRefine((data, ctx) => {
     if (data.meetingStart && (!data.meetingDuration || !data.meetingMode)) {
       ctx.addIssue({ code: "custom", path: ["meetingStart"], message: "Уулзалтын хугацаа, хэлбэрээ сонгоно уу" })
+    }
+    if (data.meetingStart && data.meetingMode === "visit" && !data.meetingAddress) {
+      ctx.addIssue({ code: "custom", path: ["meetingAddress"], message: "Уулзах хаягаа оруулна уу" })
     }
     if (!data.packageId) return
     const service = data.service === "other" ? undefined : getService(data.service)

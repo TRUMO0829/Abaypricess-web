@@ -7,33 +7,35 @@ export const bookingConfig = {
   workdays: [1, 2, 3, 4, 5],
   dayStartMinutes: 8 * 60,
   dayEndMinutes: 18 * 60,
+  /** Эхлэх цагийн алхам */
   slotStepMinutes: 30,
   /** Хамгийн багадаа хэдэн минутын өмнө захиалах */
   minNoticeMinutes: 4 * 60,
   /** Өнөөдрөөс хойш хэдэн хоногийн цагийг харуулах */
   horizonDays: 14,
-  /** Уулзалтын үргэлжлэх хугацаа ба бусад уулзалтаас хэдэн минут зай авах */
-  durations: {
-    "30": { minutes: 30, bufferMinutes: 15 },
-    "60": { minutes: 60, bufferMinutes: 30 },
-  },
+  /** Уулзалт 30 минутаас 1 цаг; дуусах цагийг 15 минутын алхмаар сонгоно */
+  minMeetingMinutes: 30,
+  maxMeetingMinutes: 60,
+  meetingStepMinutes: 15,
+  /** Календарийн завгүй цаг дууссаны дараа авах зай. Завгүй цагийн өмнө зай авахгүй. */
+  bufferAfterMinutes: 15,
 }
 
-export const meetingDurationValues = ["30", "60"] as const
-export const meetingModeValues = ["online", "office"] as const
+/** min…max хооронд step-ээр — `minMeetingMinutes` гэх мэт өөрчлөгдвөл энд нэмнэ */
+export const meetingDurationValues = ["30", "45", "60"] as const
+export const meetingModeValues = ["visit", "office", "online"] as const
 export type MeetingDuration = (typeof meetingDurationValues)[number]
 export type MeetingMode = (typeof meetingModeValues)[number]
 
 export const bookingContent = {
   title: "Уулзалтын цаг",
-  optional: "(заавал биш)",
-  description: "Google Calendar-аас шууд шинэчлэгдэх сул цагууд. Цаг сонговол урилга таны имэйлд очно.",
-  /** Календарь зөвхөн унших горимд (API key) — уулзалт автоматаар үүсэхгүй */
-  descriptionRequest: "Google Calendar-аас шууд шинэчлэгдэх сул цагууд. Сонгосон цаг тань хүсэлтэд орж, бид баталгаажуулна.",
-  durationLabel: "Үргэлжлэх хугацаа",
-  durations: { "30": "30 минут", "60": "1 цаг" } satisfies Record<MeetingDuration, string>,
-  modeLabel: "Уулзалтын хэлбэр",
-  modes: { online: "Онлайн (Google Meet)", office: "Оффист" } satisfies Record<MeetingMode, string>,
+  durationLabel: "Дуусах цаг",
+  durations: { "30": "30 минут", "45": "45 минут", "60": "1 цаг" } satisfies Record<MeetingDuration, string>,
+  modeLabel: "Уулзах газар",
+  modes: { visit: "Очиж уулзах", office: "Оффист урих", online: "Онлайн" } satisfies Record<MeetingMode, string>,
+  /** «Очиж уулзах» үед харилцагчийн хаяг */
+  addressLabel: "Уулзах хаяг",
+  addressPlaceholder: "Ж: Сүхбаатар дүүрэг, Сентрал Тауэр, 5 давхар",
   dayLabel: "Өдөр",
   timeLabel: "Сул цаг",
   noSlots: "Энэ өдөр сул цаг алга. Өөр өдөр сонгоно уу.",
@@ -57,6 +59,7 @@ export const bookingContent = {
       meet: "Google Meet холбоос урилгад орсон байгаа.",
       meetLink: "Google Meet холбоос",
       office: "Уулзалт манай оффист болно:",
+      visit: "Манай зөвлөх дараах хаягаар очиж уулзана:",
       again: "Шинэ хүсэлт илгээх",
     },
     slotTaken: {

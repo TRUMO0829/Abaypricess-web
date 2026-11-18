@@ -16,13 +16,19 @@ export interface ScheduleConfig {
   horizonDays: number
 }
 
+export interface AvailableSlot {
+  /** Уулзалт эхлэх цаг, "2026-11-20T10:00:00+08:00" */
+  start: string
+  /** Энэ цагаас хамгийн удаан хэдэн минутын уулзалт багтах вэ (min…max, step-ээр) */
+  maxMinutes: number
+}
+
 export interface AvailabilityDay {
   /** Орон нутгийн огноо, "2026-11-20" */
   date: string
   /** 0 = Ням … 6 = Бямба */
   weekday: number
-  /** Сул цагийн эхлэл, "2026-11-20T10:00:00+08:00" */
-  slots: string[]
+  slots: AvailableSlot[]
 }
 
 const MINUTE = 60_000
@@ -57,14 +63,28 @@ export function availabilityWindow(now: number, config: ScheduleConfig): Interva
 interface ComputeOptions {
   now: number
   busy: Interval[]
-  durationMinutes: number
-  /** Завгүй цагийн өмнө, хойно авах зай */
-  bufferMinutes: number
+  /** Уулзалтын хамгийн бага / их үргэлжлэх хугацаа, дуусах цагийн алхам (ж: 30, 60, 15) */
+  minMinutes: number
+  maxMinutes: number
+  stepMinutes: number
+  /** Завгүй цаг дууссаны дараа авах зай. Завгүй цагийн өмнө зай авахгүй (уулзалт шууд залгаж болно). */
+  bufferAfterMinutes: number
   config: ScheduleConfig
 }
 
-/** Ажлын өдөр бүрийн сул цагууд: ажлын цагт багтсан, хангалттай эрт, завгүй цагаас buffer-ээр зайтай. */
-export function computeAvailability({ now, busy, durationMinutes, bufferMinutes, config }: ComputeOptions): AvailabilityDay[] {
+/**
+ * Ажлын өдөр бүрийн эхлэх цагууд ба тэр цагаас багтах хамгийн урт уулзалт.
+ * Нөхцөл: ажлын цагт багтана, хангалттай эрт, завгүй цаг (+ дараах зай)-тай давхцахгүй, `minMinutes`-ээс богиноггүй.
+ */
+export function computeAvailability({
+  now,
+  busy,
+  minMinutes,
+  maxMinutes,
+  stepMinutes,
+  bufferAfterMinutes,
+  config,
+}: ComputeOptions): AvailabilityDay[] {
   const offset = config.utcOffsetMinutes * MINUTE
   const earliest = now + config.minNoticeMinutes * MINUTE
   const days: AvailabilityDay[] = []
@@ -75,15 +95,29 @@ export function computeAvailability({ now, busy, durationMinutes, bufferMinutes,
     const weekday = day.getUTCDay()
     if (!config.workdays.includes(weekday)) continue
 
-    const slots: string[] = []
-    for (let t = config.dayStartMinutes; t + durationMinutes <= config.dayEndMinutes; t += config.slotStepMinutes) {
+    const dayEnd = midnight + config.dayEndMinutes * MINUTE - offset
+    const slots: AvailableSlot[] = []
+    for (let t = config.dayStartMinutes; t + minMinutes <= config.dayEndMinutes; t += config.slotStepMinutes) {
       const start = midnight + t * MINUTE - offset
-      const end = start + durationMinutes * MINUTE
       if (start < earliest) continue
-      const guardStart = start - bufferMinutes * MINUTE
-      const guardEnd = end + bufferMinutes * MINUTE
-      if (busy.some((b) => b.start < guardEnd && b.end > guardStart)) continue
-      slots.push(toLocalIso(start, config.utcOffsetMinutes))
+
+      // Эхлэх цаг завгүй цаг эсвэл түүний дараах зайд орвол болохгүй; дараагийн завгүй цаг хүртэл сул
+      let limit = Math.min(dayEnd, start + maxMinutes * MINUTE)
+      let blocked = false
+      for (const b of busy) {
+        if (b.start <= start && b.end + bufferAfterMinutes * MINUTE > start) {
+          blocked = true
+          break
+        }
+        if (b.start > start && b.start < limit) limit = b.start
+      }
+      const free = (limit - start) / MINUTE
+      if (blocked || free < minMinutes) continue
+
+      slots.push({
+        start: toLocalIso(start, config.utcOffsetMinutes),
+        maxMinutes: minMinutes + Math.floor((free - minMinutes) / stepMinutes) * stepMinutes,
+      })
     }
 
     days.push({

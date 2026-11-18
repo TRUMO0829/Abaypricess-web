@@ -9,7 +9,7 @@ export interface NewEvent {
   summary: string
   description: string
   attendee: { email: string; name: string }
-  mode: "online" | "office"
+  mode: "online" | "office" | "visit"
   location?: string
 }
 
@@ -199,11 +199,13 @@ const mockProvider: CalendarProvider = {
  * туршилтын календарь. Production-д тохиргоогүй бол `null` — цаг захиалга нуугдаж, маягт имэйлээр ажилласаар байна.
  */
 export function getCalendarProvider(): CalendarProvider | null {
+  // e2e: .env.local-д бодит түлхүүр байсан ч туршилтын календарь
+  if (process.env.BOOKING_MOCK === "1") return mockProvider
   const env = googleEnv()
   if (env) return googleProvider(env)
   const keyEnv = googleKeyEnv()
   if (keyEnv) return googleKeyProvider(keyEnv)
-  if (process.env.BOOKING_MOCK === "1" || process.env.NODE_ENV === "development") return mockProvider
+  if (process.env.NODE_ENV === "development") return mockProvider
   return null
 }
 

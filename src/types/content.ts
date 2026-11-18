@@ -11,11 +11,6 @@ export interface NavItem {
   children?: NavItem[]
 }
 
-export interface FaqItem {
-  question: string
-  answer: string
-}
-
 export interface ValueItem {
   icon: LucideIcon
   title: string
@@ -99,7 +94,6 @@ export interface Service {
   packages: PricePackage[]
   /** Диаграмм дээрх баримтын нэр, ж: "Сургалтын үйлчилгээ, үнийн санал" */
   deliverable: string
-  faq: FaqItem[]
 }
 
 export interface TeamMember {
@@ -108,8 +102,9 @@ export interface TeamMember {
   /** `public/team/` доторх зураг, ж: "/team/bat.jpg". Байхгүй бол нэрийн эхний үсэг харагдана. */
   photo?: string
   summary: string
-  education: string[]
+  /** CV: ажлын туршлага */
   experience: string[]
+  /** CV: ур чадвар */
   expertise: string[]
 }
 export interface ReportMetric {

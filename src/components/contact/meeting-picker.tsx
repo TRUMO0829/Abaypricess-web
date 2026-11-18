@@ -4,8 +4,8 @@ import { useEffect, useEffectEvent, useState, type ReactNode } from "react"
 import { AlertCircle, CalendarClock, RotateCw, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
-  bookingConfig,
   bookingContent as t,
   meetingDurationValues,
   meetingModeValues,
@@ -13,7 +13,8 @@ import {
   type MeetingMode,
 } from "@/content/booking"
 import type { AvailabilityResponse } from "@/lib/booking/availability"
-import { formatDayLong, formatMeeting, slotTime } from "@/lib/booking/format"
+import { addMinutes, formatDayLong, formatMeeting, slotTime } from "@/lib/booking/format"
+import type { AvailableSlot } from "@/lib/booking/slots"
 import { cn } from "@/lib/utils"
 
 /** Сул цагийг хэдэн секунд тутам дахин асуух (табыг дахин нээхэд мөн шинэчилнэ) */
@@ -32,12 +33,13 @@ interface ChoiceProps {
   onSelect: () => void
   label?: string
   muted?: boolean
+  disabled?: boolean
   className?: string
   children: ReactNode
 }
 
 /** Товч хэлбэртэй radio — гарын сумаар шилжинэ, дэлгэц уншигчид radio гэж уншигдана. */
-function Choice({ name, value, checked, onSelect, label, muted, className, children }: ChoiceProps) {
+function Choice({ name, value, checked, onSelect, label, muted, disabled, className, children }: ChoiceProps) {
   return (
     <label
       className={cn(
@@ -45,6 +47,7 @@ function Choice({ name, value, checked, onSelect, label, muted, className, child
         "hover:border-primary/50 has-checked:border-primary has-checked:bg-primary has-checked:text-primary-foreground",
         "has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
         muted && "text-muted-foreground",
+        disabled && "pointer-events-none opacity-40",
         className
       )}
     >
@@ -54,6 +57,7 @@ function Choice({ name, value, checked, onSelect, label, muted, className, child
         value={value}
         checked={checked}
         onChange={onSelect}
+        disabled={disabled}
         aria-label={label}
         // Label-ийг бүтэн бүрхсэн тунгалаг input: дарах талбай том, дэлгэц уншигчид radio хэвээр
         className="absolute inset-0 cursor-pointer appearance-none rounded-lg opacity-0"
@@ -74,6 +78,10 @@ interface MeetingPickerProps {
   refreshKey: number
   /** Календарьт уулзалт үүсгэж чадах эсэх (API key горимд `false` — цаг хүсэлтэд л орно) */
   onCanBookChange?: (canBook: boolean) => void
+  /** «Очиж уулзах» үеийн хаяг */
+  address: string
+  onAddressChange: (value: string) => void
+  addressError?: string
 }
 
 export function MeetingPicker({
@@ -85,17 +93,30 @@ export function MeetingPicker({
   onModeChange,
   refreshKey,
   onCanBookChange,
+  address,
+  onAddressChange,
+  addressError,
 }: MeetingPickerProps) {
   const [load, setLoad] = useState<LoadState>({ state: "loading" })
   const [selectedDate, setSelectedDate] = useState<string>()
   const [slotLost, setSlotLost] = useState(false)
   const [tick, setTick] = useState(0)
 
-  // Шинэ өгөгдөл ирэхэд сонгосон цаг алга болсон бол сонголтыг цуцална
+  /** Тухайн эхлэх цагаас багтах хугацаанд дуусах цагийг тааруулна (одоогийнх багтахгүй бол хамгийн уртыг). */
+  function fitDuration(slot: AvailableSlot) {
+    if (Number(duration) <= slot.maxMinutes) return
+    const longest = meetingDurationValues.filter((value) => Number(value) <= slot.maxMinutes).at(-1)
+    if (longest) onDurationChange(longest)
+  }
+
+  // Шинэ өгөгдөл ирэхэд сонгосон цаг алга болсон бол сонголтыг цуцална, богиноссон бол дуусах цагийг тааруулна
   const receive = useEffectEvent((next: LoadState) => {
-    if (next.state === "ready" && start && !next.data.days.some((day) => day.slots.includes(start))) {
-      onStartChange("")
-      setSlotLost(true)
+    if (next.state === "ready" && start) {
+      const slot = next.data.days.flatMap((day) => day.slots).find((s) => s.start === start)
+      if (!slot) {
+        onStartChange("")
+        setSlotLost(true)
+      } else fitDuration(slot)
     }
     if (next.state === "ready") onCanBookChange?.(next.data.mode !== "google-key")
     setLoad(next)
@@ -103,7 +124,7 @@ export function MeetingPicker({
 
   useEffect(() => {
     const controller = new AbortController()
-    fetch(`/api/booking/availability?duration=${duration}`, { cache: "no-store", signal: controller.signal })
+    fetch("/api/booking/availability", { cache: "no-store", signal: controller.signal })
       .then(async (res) => {
         if (res.status === 503) return receive({ state: "unavailable" })
         if (!res.ok) return receive({ state: "error" })
@@ -116,7 +137,7 @@ export function MeetingPicker({
         }
       })
     return () => controller.abort()
-  }, [duration, refreshKey, tick])
+  }, [refreshKey, tick])
 
   useEffect(() => {
     const refresh = () => setTick((n) => n + 1)
@@ -132,49 +153,51 @@ export function MeetingPicker({
   const days = load.state === "ready" ? load.data.days : []
   const activeDay =
     days.find((day) => day.date === selectedDate) ?? days.find((day) => day.slots.length > 0) ?? days[0]
-  const minutes = bookingConfig.durations[duration].minutes
+  const minutes = Number(duration)
+  const selectedSlot = days.flatMap((day) => day.slots).find((slot) => slot.start === start)
 
   return (
     <fieldset className="flex min-w-0 flex-col gap-5 rounded-xl bg-muted/40 p-5 ring-1 ring-foreground/10">
       <legend className="sr-only">{t.title}</legend>
-      <div className="flex flex-col gap-1">
-        <p className="flex items-center gap-2 font-semibold">
-          <CalendarClock className="size-4 text-primary" aria-hidden />
-          {t.title} <span className="font-normal text-muted-foreground">{t.optional}</span>
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {load.state === "ready" && load.data.mode === "google-key" ? t.descriptionRequest : t.description}
-        </p>
-      </div>
+      <p className="flex items-center gap-2 font-semibold">
+        <CalendarClock className="size-4 text-primary" aria-hidden />
+        {t.title}
+      </p>
 
       {load.state === "ready" && load.data.mode === "mock" && (
         <p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">{t.mockNotice}</p>
       )}
 
-      <div role="radiogroup" aria-label={t.durationLabel} className="grid grid-cols-2 gap-2">
-        {meetingDurationValues.map((value) => (
-          <Choice
-            key={value}
-            name="meeting-duration"
-            value={value}
-            checked={duration === value}
-            onSelect={() => {
-              onDurationChange(value)
-              onStartChange("")
-            }}
-          >
-            {t.durations[value]}
-          </Choice>
-        ))}
-      </div>
-
-      <div role="radiogroup" aria-label={t.modeLabel} className="grid grid-cols-2 gap-2">
+      <div role="radiogroup" aria-label={t.modeLabel} className="grid grid-cols-3 gap-2">
         {meetingModeValues.map((value) => (
-          <Choice key={value} name="meeting-mode" value={value} checked={mode === value} onSelect={() => onModeChange(value)} className="text-center text-xs sm:text-sm">
+          <Choice key={value} name="meeting-mode" value={value} checked={mode === value} onSelect={() => onModeChange(value)} className="px-1.5 text-center text-xs leading-tight sm:text-sm">
             {t.modes[value]}
           </Choice>
         ))}
       </div>
+
+      {mode === "visit" && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="meetingAddress" className="text-sm font-medium">
+            {t.addressLabel} <span aria-hidden>*</span>
+          </label>
+          <Input
+            id="meetingAddress"
+            autoComplete="street-address"
+            placeholder={t.addressPlaceholder}
+            value={address}
+            onChange={(event) => onAddressChange(event.target.value)}
+            aria-invalid={!!addressError}
+            aria-describedby={addressError ? "meetingAddress-error" : undefined}
+            className="bg-background"
+          />
+          {addressError && (
+            <p id="meetingAddress-error" className="text-sm text-destructive">
+              {addressError}
+            </p>
+          )}
+        </div>
+      )}
 
       <div aria-live="polite" className="flex flex-col gap-4">
         {load.state === "loading" && (
@@ -209,7 +232,7 @@ export function MeetingPicker({
 
         {load.state === "ready" && activeDay && days.some((day) => day.slots.length > 0) && (
           <>
-            <div role="radiogroup" aria-label={t.dayLabel} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            <div role="radiogroup" aria-label={t.dayLabel} className="-mx-1 flex [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] gap-2 overflow-x-auto px-1 pb-1">
               {days.map((day) => (
                 <Choice
                   key={day.date}
@@ -233,18 +256,46 @@ export function MeetingPicker({
               <div role="radiogroup" aria-label={`${t.timeLabel}: ${formatDayLong(activeDay.date)}`} className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-3">
                 {activeDay.slots.map((slot) => (
                   <Choice
-                    key={slot}
+                    key={slot.start}
                     name="meeting-slot"
-                    value={slot}
-                    checked={start === slot}
+                    value={slot.start}
+                    checked={start === slot.start}
                     onSelect={() => {
-                      onStartChange(slot)
+                      onStartChange(slot.start)
+                      fitDuration(slot)
                       setSlotLost(false)
                     }}
                   >
-                    {slotTime(slot)}
+                    {slotTime(slot.start)}
                   </Choice>
                 ))}
+              </div>
+            )}
+
+            {selectedSlot && (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium">{t.durationLabel}</p>
+                <div role="radiogroup" aria-label={t.durationLabel} className="grid grid-cols-3 gap-2">
+                  {meetingDurationValues.map((value) => {
+                    const fits = Number(value) <= selectedSlot.maxMinutes
+                    const end = addMinutes(slotTime(selectedSlot.start), Number(value))
+                    return (
+                      <Choice
+                        key={value}
+                        name="meeting-duration"
+                        value={value}
+                        checked={duration === value}
+                        onSelect={() => onDurationChange(value)}
+                        label={`${end} (${t.durations[value]})`}
+                        disabled={!fits}
+                        className="flex-col gap-0.5 px-2 leading-tight"
+                      >
+                        <span className="font-semibold">{end}</span>
+                        <span className="text-[0.7rem] font-normal opacity-80">{t.durations[value]}</span>
+                      </Choice>
+                    )
+                  })}
+                </div>
               </div>
             )}
           </>

@@ -57,7 +57,6 @@ function PersonCard({ person, id }: { person: TeamMember; id: string }) {
         <AccordionItem value={id} className="border-b-0">
           <AccordionTrigger className="text-sm">{t.cv}</AccordionTrigger>
           <AccordionContent className="flex flex-col gap-4">
-            <CvList label={t.education} items={person.education} />
             <CvList label={t.experience} items={person.experience} />
             <CvList label={t.expertise} items={person.expertise} />
           </AccordionContent>

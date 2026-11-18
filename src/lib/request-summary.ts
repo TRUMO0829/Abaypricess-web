@@ -1,4 +1,4 @@
-import { bookingConfig, bookingContent } from "@/content/booking"
+import { bookingContent } from "@/content/booking"
 import { company } from "@/content/company"
 import { serviceOptions } from "@/content/contact"
 import { getService } from "@/content/services"
@@ -19,9 +19,9 @@ export function getServiceLabel(service: RequestInput["service"]): string {
 export function buildRequestLines(data: RequestInput): string[] {
   const packageName = getPackageName(data.service, data.packageId)
   return [
-    `Овог нэр: ${data.name}`,
+    `Нэр: ${data.name}`,
     `Байгууллага: ${data.organization}`,
-    data.position ? `Албан тушаал: ${data.position}` : null,
+    `Албан тушаал: ${data.position}`,
     `Имэйл: ${data.email}`,
     `Утас: ${data.phone}`,
     `Үйлчилгээ: ${getServiceLabel(data.service)}`,
@@ -33,11 +33,12 @@ export function buildRequestLines(data: RequestInput): string[] {
 /** Сонгосон уулзалтын цагийн мөрүүд (цаг сонгоогүй бол хоосон). */
 export function buildMeetingLines(data: RequestInput): string[] {
   if (!data.meetingStart || !data.meetingDuration || !data.meetingMode) return []
-  const { minutes } = bookingConfig.durations[data.meetingDuration]
+  const minutes = Number(data.meetingDuration)
   return [
     "",
     `${bookingContent.mailMeetingLabel}: ${formatMeeting(data.meetingStart, minutes)}`,
-    `Хэлбэр: ${bookingContent.modes[data.meetingMode]}`,
+    `${bookingContent.modeLabel}: ${bookingContent.modes[data.meetingMode]}`,
+    ...(data.meetingMode === "visit" && data.meetingAddress ? [`${bookingContent.addressLabel}: ${data.meetingAddress}`] : []),
   ]
 }
 

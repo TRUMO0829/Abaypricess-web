@@ -22,6 +22,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 240_000,
     // Цаг захиалгыг Google-гүйгээр туршилтын календараар шалгана
-    env: { BOOKING_MOCK: "1" },
+    // .env.local-д бодит түлхүүр байсан ч тест Google/Supabase руу хандахгүй
+    env: { BOOKING_MOCK: "1", ASSESSMENT_MOCK: "1" },
   },
 })

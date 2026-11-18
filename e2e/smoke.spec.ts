@@ -10,8 +10,9 @@ const routes = [
   "/services/training/trainers",
   "/services/training/pricing",
   "/services/training/report",
-  "/services/training/faq",
   "/services/update/report",
+  "/services/laboratory/assessment",
+  "/assessment",
   "/contact",
 ]
 
@@ -41,12 +42,12 @@ test("тайлангийн загвар вебээс хасагдсан", async 
   expect(await page.locator('meta[name="robots"][content*="noindex"]').count()).toBeGreaterThan(0)
 })
 
-test("нүүрэнд тоон үзүүлэлт, диаграммын эхлэх/дуусах, дугаар байхгүй", async ({ page }) => {
+// 4-р засвар: нүүрээс тоон үзүүлэлт, үйлчилгээний урсгал, үйлчилгээний тойм, FAQ хасагдсан
+test("нүүрэнд хасагдсан хэсгүүд гарахгүй", async ({ page }) => {
   await page.goto("/")
   await expect(page.getByText("Тоон үзүүлэлт")).toHaveCount(0)
-  const flow = page.locator("#process")
-  await expect(flow.getByText(/^(Эхлэх|Дуусах)$/)).toHaveCount(0)
-  await expect(flow.locator("li:visible")).toHaveCount(3)
+  await expect(page.locator("#process, #services, #faq")).toHaveCount(0)
+  await expect(page.getByRole("heading", { name: /Бидний үйлчилгээний чиглэлүүд|Бидний үндсэн 3 үйлчилгээ/ })).toHaveCount(0)
 })
 
 test("нүүр: багийн гишүүд, CV задарна", async ({ page }) => {
@@ -57,7 +58,9 @@ test("нүүр: багийн гишүүд, CV задарна", async ({ page }) 
   const trigger = triggers.first()
   await trigger.click()
   await expect(trigger).toHaveAttribute("aria-expanded", "true")
-  await expect(team.getByText("Боловсрол").first()).toBeVisible()
+  await expect(team.getByText("Ажлын туршлага").first()).toBeVisible()
+  await expect(team.getByText("Ур чадвар").first()).toBeVisible()
+  await expect(team.getByText("Боловсрол")).toHaveCount(0)
 })
 
 test("тодорхойгүй үйлчилгээ not-found харуулна", async ({ page }) => {

@@ -2,10 +2,8 @@ import type { Metadata } from "next"
 
 import { ServicesFlow } from "@/components/services/services-flow"
 import { CtaBanner } from "@/components/shared/cta-banner"
-import { FaqAccordion } from "@/components/shared/faq-accordion"
 import { PageHeader } from "@/components/shared/page-header"
 import { SectionHeading } from "@/components/shared/section-heading"
-import { generalFaq } from "@/content/faq"
 import { servicesPageContent } from "@/content/services"
 
 export const metadata: Metadata = {
@@ -14,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 export default function ServicesPage() {
-  const { header, flow, faq } = servicesPageContent
+  const { header, flow } = servicesPageContent
 
   return (
     <>
@@ -34,13 +32,6 @@ export default function ServicesPage() {
             description={flow.description}
           />
           <ServicesFlow />
-        </div>
-      </section>
-
-      <section className="border-t bg-muted/40 py-20 md:py-28">
-        <div className="container flex max-w-3xl flex-col gap-10">
-          <SectionHeading eyebrow={faq.eyebrow} title={faq.title} highlight={faq.highlight} />
-          <FaqAccordion items={generalFaq} />
         </div>
       </section>
 

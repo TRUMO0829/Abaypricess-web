@@ -8,6 +8,8 @@
 
 > 2026-11-18-ны 2-р засвар: «1 мэдээлэл = 1 хуудас». Үйлчилгээний хуудас дэд хуудсуудад хуваагдаж, толгойн товчны доор цэс (`ServiceTabs`, `getServiceTabs()`) байрлана. Тайлангийн загвар үйлчилгээ бүрийн «Тайлан» tab-д буцаж орсон. Сургалтад сургагч багш нарын CV (`Service.trainers`) нэмэгдсэн. Хүний карт `components/shared/person-card.tsx`.
 
+> 2026-11-18-ны 4-р засвар: FAQ (нүүр, `/services`, үйлчилгээний «Асуулт, хариулт» tab) бүрэн хасагдсан. Оронд нь цэсэнд «Асуулт хариулт» → `/assessment` байгууллагын үнэлгээний асуулга нэмэгдсэн (`docs/ASSESSMENT.md`).
+
 > 2026-11-18-ны 3-р засвар: `/about` хуудас хасагдсан. Бидний тухай мэдээлэл нүүр хуудсанд байгаа тул «Манай баг» нүүр рүү шилжиж, цэс/footer-аас «Бидний тухай» холбоос хасагдсан.
 
 ## Стек
@@ -23,12 +25,13 @@
 
 | Route | Хуудас | Эзэмшигч |
 |---|---|---|
-| `/` | Нүүр: Hero, бидний тухай (танилцуулга, эрхэм зорилго, алсын хараа, үнэт зүйлс), манай баг (CV), үйлчилгээний диаграмм, үйлчилгээний тойм, FAQ, CTA | ABAY-1 |
+| `/` | Нүүр: Hero, бидний тухай (танилцуулга, эрхэм зорилго, алсын хараа, үнэт зүйлс), манай баг (CV), үйлчилгээний диаграмм, үйлчилгээний тойм, CTA | ABAY-1 |
 | `/services` | 3 үйлчилгээний тойм + нийт урсгал | ABAY-2 |
 | `/services/[slug]` | `training` · `laboratory` · `update` — Тойм: тайлбар, үр өгөөж, процесс, дараагийн алхам | ABAY-2 |
-| `/services/[slug]/{programs,trainers,pricing,report,faq}` | Дэд хуудас бүр нэг мэдээлэл: хөтөлбөр, сургагч багш (CV), үнийн санал, тайлангийн загвар (A4, хэвлэх), FAQ. Хөтөлбөр/багшгүй үйлчилгээнд тэр tab байхгүй | ABAY-2 |
+| `/services/[slug]/{programs,trainers,pricing,report}` | Дэд хуудас бүр нэг мэдээлэл: хөтөлбөр, сургагч багш (CV), үнийн санал, тайлангийн загвар (A4, хэвлэх). Хөтөлбөр/багшгүй үйлчилгээнд тэр tab байхгүй | ABAY-2 |
+| `/assessment` | Байгууллагын үнэлгээ («Асуулт хариулт»): бүлэг бүрээр асуулт, жинлэсэн оноо → Supabase + имэйл мэдэгдэл (`docs/ASSESSMENT.md`) | coordinator |
 | `/contact` | Хүсэлтийн маягт (`?service=&package=` урьдчилж бөглөнө) + Google Calendar-ын сул цагаас уулзалт захиалах (`docs/BOOKING.md`) | ABAY-3 |
-| `/api/booking/availability` | Сул цагийн JSON (`?duration=30\|60`), cache-гүй | ABAY-3 |
+| `/api/booking/availability` | Эхлэх цаг бүр ба багтах хамгийн урт хугацаа (`{ start, maxMinutes }`), cache-гүй | ABAY-3 |
 
 ## Хавтасны бүтэц
 
@@ -37,20 +40,21 @@ src/
 ├─ app/                  route-ууд (дээрх хүснэгт), layout.tsx, globals.css
 ├─ components/
 │  ├─ ui/                shadcn primitives — `npx shadcn@latest add <нэр>` (coordinator)
-│  ├─ shared/            SectionHeading, PageHeader, CtaBanner, FaqAccordion (coordinator)
+│  ├─ shared/            SectionHeading, PageHeader, CtaBanner, PersonCard (coordinator)
 │  ├─ layout/            Navbar, Footer, Logo, ModeToggle (ABAY-1)
 │  ├─ home/              нүүрний section-ууд (ABAY-1)
 │  ├─ services/          үйлчилгээний component-ууд (ABAY-2)
-│  └─ contact/           маягт, холбоо барих мэдээлэл (ABAY-3)
+│  ├─ contact/           маягт, холбоо барих мэдээлэл (ABAY-3)
+│  └─ assessment/        байгууллагын үнэлгээний асуулга
 ├─ content/              бүх текст, үнэ, алхам — typed data (монгол)
-├─ lib/                  utils (cn), format (formatMNT), theme, brand (лого asset), request-schema, request, booking/ (уулзалтын цаг)
-└─ types/content.ts      агуулгын гэрээ (contract)
+├─ lib/                  utils (cn), format (formatMNT), theme, brand (лого asset), request-schema, request, booking/ (уулзалтын цаг), assessment/ (үнэлгээ)
+└─ types/               content.ts (агуулгын гэрээ), assessment.ts (асуулгын гэрээ)
 ```
 
 ## Агуулгын урсгал
 
 - Бүх текст, үнэ, алхам `src/content/*.ts`-д байна; component-ууд түүнийг import хийнэ. Component дотор текст hard-code хийхгүй (товчны богино шошгоос бусад).
-- Төрлүүд `src/types/content.ts`-д: `Service`, `ProcessStep`, `Program`, `PricePackage`, `FlowStage`, `ReportTemplate`, `FaqItem`, `Company`, `NavItem`, `Stat`.
+- Төрлүүд `src/types/content.ts`-д: `Service`, `ProcessStep`, `Program`, `PricePackage`, `FlowStage`, `ReportTemplate`, `Company`, `NavItem`, `Stat`.
 - Үнэ бүгд **түр утга** (`// TODO: бодит үнэ`). `price: null` → "Тохиролцоно". Харуулахдаа `formatMNT()` (`src/lib/format.ts`).
 - Туслах функц: `getService(slug)`, `getNextService(slug)` (`src/content/services.ts`), `flowStages` (`src/content/process.ts`).
 

@@ -21,42 +21,55 @@ const ub = (iso: string) => Date.parse(`${iso}+08:00`)
 // 2026-11-16 Даваа, 06:00 (UB)
 const monday6am = ub("2026-11-16T06:00:00")
 
+/** Уулзалт 30–60 минут, дуусах цаг 15 минутын алхамтай, завгүй цагийн дараа 15 минут зай */
+const meeting = { minMinutes: 30, maxMinutes: 60, stepMinutes: 15, bufferAfterMinutes: 15 }
+const compute = (now: number, busy: { start: number; end: number }[] = []) =>
+  computeAvailability({ now, busy, ...meeting, config })
+const day = (days: ReturnType<typeof compute>, date: string) => days.find((d) => d.date === date)!.slots
+const maxAt = (slots: ReturnType<typeof day>, time: string) => slots.find((s) => s.start.slice(11, 16) === time)?.maxMinutes
+
 test("ажлын цаг, алхам, амралтын өдөр", () => {
-  const days = computeAvailability({ now: monday6am, busy: [], durationMinutes: 60, bufferMinutes: 30, config })
+  const days = compute(monday6am)
   // 14 хоногт 10 ажлын өдөр, бямба/ням алгасна
   expect(days).toHaveLength(10)
-  expect(days.every((day) => day.weekday >= 1 && day.weekday <= 5)).toBe(true)
-  // Мягмар гаригт 08:00-17:00 хооронд 30 минутын алхамтай 19 цаг (сүүлийнх 17:00–18:00)
-  const tuesday = days.find((day) => day.date === "2026-11-17")!
-  expect(tuesday.slots[0]).toBe("2026-11-17T08:00:00+08:00")
-  expect(tuesday.slots.at(-1)).toBe("2026-11-17T17:00:00+08:00")
-  expect(tuesday.slots).toHaveLength(19)
+  expect(days.every((d) => d.weekday >= 1 && d.weekday <= 5)).toBe(true)
+  // Мягмар: 08:00–17:30 хооронд 30 минутын алхамтай 20 эхлэх цаг
+  const tuesday = day(days, "2026-11-17")
+  expect(tuesday).toHaveLength(20)
+  expect(tuesday[0]).toEqual({ start: "2026-11-17T08:00:00+08:00", maxMinutes: 60 })
+  // 17:00-оос 1 цаг багтана, 17:30-аас зөвхөн 30 минут (18:00-д ажлын цаг дуусна)
+  expect(maxAt(tuesday, "17:00")).toBe(60)
+  expect(tuesday.at(-1)).toEqual({ start: "2026-11-17T17:30:00+08:00", maxMinutes: 30 })
 })
 
 test("хамгийн багадаа 4 цагийн өмнө захиална", () => {
-  const days = computeAvailability({ now: monday6am, busy: [], durationMinutes: 30, bufferMinutes: 15, config })
+  const days = compute(monday6am)
   // 06:00 + 4 цаг = 10:00-аас өмнөх цаг өнөөдөр харагдахгүй
   expect(days[0].date).toBe("2026-11-16")
-  expect(days[0].slots[0]).toBe("2026-11-16T10:00:00+08:00")
+  expect(days[0].slots[0].start).toBe("2026-11-16T10:00:00+08:00")
 })
 
-test("завгүй цагийн өмнө, хойно buffer-ээр зай авна", () => {
+test("завгүй цагийн өмнө зай авахгүй, дараа нь 15 минут зай авна", () => {
   const busy = [{ start: ub("2026-11-17T12:00:00"), end: ub("2026-11-17T13:00:00") }]
-  const slots60 = computeAvailability({ now: monday6am, busy, durationMinutes: 60, bufferMinutes: 30, config }).find(
-    (day) => day.date === "2026-11-17"
-  )!.slots
-  // 60 минут + 30 минутын зай: 10:30 (11:30-д дуусна) болно, 11:00 болохгүй; 13:30-аас эхэлнэ
-  expect(slots60).toContain("2026-11-17T10:30:00+08:00")
-  expect(slots60).not.toContain("2026-11-17T11:00:00+08:00")
-  expect(slots60).not.toContain("2026-11-17T13:00:00+08:00")
-  expect(slots60).toContain("2026-11-17T13:30:00+08:00")
+  const slots = day(compute(monday6am, busy), "2026-11-17")
+  // 11:00–12:00 шууд залгана; 11:30-аас зөвхөн 30 минут багтана
+  expect(maxAt(slots, "11:00")).toBe(60)
+  expect(maxAt(slots, "11:30")).toBe(30)
+  // 12:00, 12:30 завгүй; 13:00 нь дараах 15 минутын зайд орно; 13:30-аас чөлөөтэй
+  expect(maxAt(slots, "12:00")).toBeUndefined()
+  expect(maxAt(slots, "12:30")).toBeUndefined()
+  expect(maxAt(slots, "13:00")).toBeUndefined()
+  expect(maxAt(slots, "13:30")).toBe(60)
+})
 
-  const slots30 = computeAvailability({ now: monday6am, busy, durationMinutes: 30, bufferMinutes: 15, config }).find(
-    (day) => day.date === "2026-11-17"
-  )!.slots
-  // 30 минут + 15 минутын зай: 11:00 (11:30-д дуусна) болно, 11:30 болохгүй
-  expect(slots30).toContain("2026-11-17T11:00:00+08:00")
-  expect(slots30).not.toContain("2026-11-17T11:30:00+08:00")
+test("дуусах цаг 15 минутын алхмаар багтана", () => {
+  const busy = [{ start: ub("2026-11-17T10:15:00"), end: ub("2026-11-17T11:00:00") }]
+  const slots = day(compute(monday6am, busy), "2026-11-17")
+  // 09:30-аас 10:15 хүртэл 45 минут; 09:00-аас 1 цаг (10:00-д дуусна) хүртэл
+  expect(maxAt(slots, "09:30")).toBe(45)
+  expect(maxAt(slots, "09:00")).toBe(60)
+  // 10:00-аас 15 минут л үлдэх тул санал болгохгүй
+  expect(maxAt(slots, "10:00")).toBeUndefined()
 })
 
 test("цагийн бүс: UB-ийн огноо, ISO", () => {
@@ -64,6 +77,5 @@ test("цагийн бүс: UB-ийн огноо, ISO", () => {
   const now = Date.parse("2026-11-16T20:00:00Z")
   const window = availabilityWindow(now, config)
   expect(toLocalIso(window.start, 480)).toBe("2026-11-17T00:00:00+08:00")
-  const days = computeAvailability({ now, busy: [], durationMinutes: 60, bufferMinutes: 30, config })
-  expect(days[0].date).toBe("2026-11-17")
+  expect(compute(now)[0].date).toBe("2026-11-17")
 })

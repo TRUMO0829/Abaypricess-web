@@ -7,7 +7,8 @@ export function slotTime(iso: string): string {
   return iso.slice(11, 16)
 }
 
-function addMinutes(hhmm: string, minutes: number): string {
+/** "10:00" + 45 → "10:45" */
+export function addMinutes(hhmm: string, minutes: number): string {
   const [h, m] = hhmm.split(":").map(Number)
   const total = h * 60 + m + minutes
   return `${pad(Math.floor(total / 60))}:${pad(total % 60)}`

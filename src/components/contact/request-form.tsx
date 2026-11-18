@@ -56,6 +56,7 @@ function useInitialValues(): DefaultValues<RequestFormValues> {
     meetingStart: "",
     meetingDuration: "60",
     meetingMode: "online",
+    meetingAddress: "",
   }
 }
 
@@ -106,6 +107,7 @@ export function RequestForm() {
   const meetingStart = useWatch({ control, name: "meetingStart" }) ?? ""
   const meetingDuration = useWatch({ control, name: "meetingDuration" }) ?? "60"
   const meetingMode = useWatch({ control, name: "meetingMode" }) ?? "online"
+  const meetingAddress = useWatch({ control, name: "meetingAddress" }) ?? ""
 
   // Үр дүн гарахад дэлгэц уншигч болон keyboard хэрэглэгчийг мэдэгдэл рүү шилжүүлнэ
   useEffect(() => {
@@ -185,7 +187,7 @@ export function RequestForm() {
         ) : (
           <p className="flex items-center gap-2 text-sm">
             <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
-            {booked.office} {company.contact.address}
+            {result.mode === "visit" ? `${booked.visit} ${result.address ?? ""}` : `${booked.office} ${company.contact.address}`}
           </p>
         )}
         <Button variant="outline" onClick={startOver}>
@@ -277,7 +279,7 @@ export function RequestForm() {
             </FieldLabel>
             <Input
               id="name"
-              autoComplete="name"
+              autoComplete="given-name"
               placeholder={text.fields.name.placeholder}
               aria-required
               aria-invalid={!!errors.name}
@@ -305,13 +307,13 @@ export function RequestForm() {
 
           <Field data-invalid={!!errors.position}>
             <FieldLabel htmlFor="position">
-              {text.fields.position.label}{" "}
-              <span className="font-normal text-muted-foreground">{text.optional}</span>
+              {text.fields.position.label} <span aria-hidden>*</span>
             </FieldLabel>
             <Input
               id="position"
               autoComplete="organization-title"
               placeholder={text.fields.position.placeholder}
+              aria-required
               aria-invalid={!!errors.position}
               aria-describedby={describedBy("position")}
               {...register("position")}
@@ -468,6 +470,9 @@ export function RequestForm() {
             onModeChange={(value) => setValue("meetingMode", value)}
             refreshKey={pickerRefresh}
             onCanBookChange={setCanBook}
+            address={meetingAddress}
+            onAddressChange={(value) => setValue("meetingAddress", value, { shouldValidate: !!errors.meetingAddress })}
+            addressError={errors.meetingAddress?.message}
           />
           <FieldError errors={[errors.meetingStart]} className="mt-2" />
         </div>
