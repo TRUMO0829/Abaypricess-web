@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { Mail, Phone } from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { cvLabels as t } from "@/content/team"
@@ -59,6 +60,37 @@ function PersonCard({ person, id }: { person: TeamMember; id: string }) {
           <AccordionContent className="flex flex-col gap-4">
             <CvList label={t.experience} items={person.experience} />
             <CvList label={t.expertise} items={person.expertise} />
+            {(person.phone || person.email) && (
+              <div className="flex flex-col gap-1.5">
+                <h4 className="text-xs font-semibold tracking-wide text-primary uppercase">{t.contact}</h4>
+                <ul className="flex flex-col gap-1 text-sm">
+                  {person.phone && (
+                    <li>
+                      <a
+                        href={`tel:${person.phone.replace(/\s/g, "")}`}
+                        aria-label={`${t.phone}: ${person.phone}`}
+                        className="inline-flex items-center gap-2 text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                      >
+                        <Phone className="size-3.5 shrink-0 text-primary" aria-hidden />
+                        {person.phone}
+                      </a>
+                    </li>
+                  )}
+                  {person.email && (
+                    <li>
+                      <a
+                        href={`mailto:${person.email}`}
+                        aria-label={`${t.email}: ${person.email}`}
+                        className="inline-flex items-center gap-2 break-all text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                      >
+                        <Mail className="size-3.5 shrink-0 text-primary" aria-hidden />
+                        {person.email}
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>

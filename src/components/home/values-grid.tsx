@@ -1,10 +1,22 @@
+import { Compass, Flag } from "lucide-react"
+
 import { company } from "@/content/company"
+import { homeSections } from "@/content/home"
 import { cn } from "@/lib/utils"
 
+const t = homeSections.intro
+
+/** Эрхэм зорилго, алсын хараа + үнэт зүйлс — нэг ижил картын grid. */
 export function ValuesGrid({ className }: { className?: string }) {
+  const items = [
+    { icon: Flag, title: t.missionLabel, description: company.mission },
+    { icon: Compass, title: t.visionLabel, description: company.vision },
+    ...company.values,
+  ]
+
   return (
-    <ul className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-4", className)}>
-      {company.values.map(({ icon: Icon, title, description }) => (
+    <ul className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-3", className)}>
+      {items.map(({ icon: Icon, title, description }) => (
         <li key={title} className="group flex flex-col gap-3 rounded-2xl border bg-card p-6 transition-colors hover:border-primary/50">
           <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
             <Icon className="size-5" aria-hidden />

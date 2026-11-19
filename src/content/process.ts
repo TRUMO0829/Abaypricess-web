@@ -7,8 +7,8 @@ export const flowStages: FlowStage[] = [
   {
     id: "training",
     lane: "Business Training Service",
-    action: "Сургалтын үйлчилгээ үзүүлэх",
-    document: "Сургалтын үйлчилгээ, үнийн санал",
+    action: "Business Training үйлчилгээ үзүүлэх",
+    document: "Business Training үйлчилгээ, үнийн санал",
     href: "/services/training",
     icon: BookOpen,
   },

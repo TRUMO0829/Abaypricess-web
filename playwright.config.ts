@@ -23,6 +23,9 @@ export default defineConfig({
     timeout: 240_000,
     // Цаг захиалгыг Google-гүйгээр туршилтын календараар шалгана
     // .env.local-д бодит түлхүүр байсан ч тест Google/Supabase руу хандахгүй
-    env: { BOOKING_MOCK: "1", ASSESSMENT_MOCK: "1" },
+    env: { BOOKING_MOCK: "1", ASSESSMENT_MOCK: "1", ZOOM_MEETING_URL: "https://zoom.us/j/1234567890",
+      AUTH_MOCK: "1",
+      AUTH_SECRET: "e2e-only-auth-secret-0123456789abcdef",
+    },
   },
 })

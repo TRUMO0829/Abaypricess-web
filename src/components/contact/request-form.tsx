@@ -21,6 +21,7 @@ import { openMailClient, submitRequest, type SubmitResult } from "@/lib/request"
 import {
   requestSchema,
   requestServiceValues,
+  ANY_HOST,
   UNDECIDED_PACKAGE,
   type RequestFormValues,
   type RequestInput,
@@ -38,18 +39,26 @@ function packagesFor(service: ServiceValue | undefined) {
   return service && service !== "other" ? (getService(service)?.packages ?? []) : []
 }
 
+/** Нэвтэрсэн хэрэглэгчийн бүртгэлийн мэдээлэл — маягтыг урьдчилж бөглөнө (засах боломжтой). */
+export interface RequestPrefill {
+  name: string
+  organization: string
+  position: string
+  phone: string
+}
+
 /** `?service=&package=`-ээс эхний утгыг уншина; буруу утгыг үл тооно. */
-function useInitialValues(): DefaultValues<RequestFormValues> {
+function useInitialValues(prefill?: RequestPrefill): DefaultValues<RequestFormValues> {
   const params = useSearchParams()
   const service = parseService(params.get("service"))
   const pkg = params.get("package")
   const packageId = pkg && packagesFor(service).some((p) => p.id === pkg) ? pkg : ""
   return {
-    name: "",
-    organization: "",
-    position: "",
+    name: prefill?.name ?? "",
+    organization: prefill?.organization ?? "",
+    position: prefill?.position ?? "",
     email: "",
-    phone: "",
+    phone: prefill?.phone ?? "",
     service,
     packageId,
     message: "",
@@ -57,6 +66,7 @@ function useInitialValues(): DefaultValues<RequestFormValues> {
     meetingDuration: "60",
     meetingMode: "online",
     meetingAddress: "",
+    meetingHost: ANY_HOST,
   }
 }
 
@@ -80,8 +90,8 @@ function ContactFallback() {
   )
 }
 
-export function RequestForm() {
-  const defaultValues = useInitialValues()
+export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
+  const defaultValues = useInitialValues(prefill)
   const [result, setResult] = useState<SubmitResult | null>(null)
   const [showSummary, setShowSummary] = useState(false)
   const [pickerRefresh, setPickerRefresh] = useState(0)
@@ -108,6 +118,7 @@ export function RequestForm() {
   const meetingDuration = useWatch({ control, name: "meetingDuration" }) ?? "60"
   const meetingMode = useWatch({ control, name: "meetingMode" }) ?? "online"
   const meetingAddress = useWatch({ control, name: "meetingAddress" }) ?? ""
+  const meetingHost = useWatch({ control, name: "meetingHost" }) ?? ANY_HOST
 
   // Үр дүн гарахад дэлгэц уншигч болон keyboard хэрэглэгчийг мэдэгдэл рүү шилжүүлнэ
   useEffect(() => {
@@ -173,11 +184,16 @@ export function RequestForm() {
         <h2 className="text-2xl font-bold">{booked.title}</h2>
         <p className="text-lg font-semibold text-primary">{formatMeeting(result.start, result.duration)}</p>
         <p className="text-muted-foreground">{booked.description}</p>
+        {result.host && (
+          <p className="text-sm">
+            <span className="text-muted-foreground">{bookingContent.hostLabel}:</span> <span className="font-medium">{result.host}</span>
+          </p>
+        )}
         {result.mode === "online" ? (
           <p className="flex items-center gap-2 text-sm">
             <Video className="size-4 shrink-0 text-primary" aria-hidden />
-            {result.meetLink ? (
-              <a href={result.meetLink} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline-offset-4 hover:underline">
+            {result.joinLink ? (
+              <a href={result.joinLink} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline-offset-4 hover:underline">
                 {booked.meetLink}
               </a>
             ) : (
@@ -470,6 +486,8 @@ export function RequestForm() {
             onModeChange={(value) => setValue("meetingMode", value)}
             refreshKey={pickerRefresh}
             onCanBookChange={setCanBook}
+            host={meetingHost}
+            onHostChange={(value) => setValue("meetingHost", value)}
             address={meetingAddress}
             onAddressChange={(value) => setValue("meetingAddress", value, { shouldValidate: !!errors.meetingAddress })}
             addressError={errors.meetingAddress?.message}

@@ -150,7 +150,7 @@ export const assessment: Assessment = {
 
 /** `/assessment` хуудасны текст */
 export const assessmentPage = {
-  navLabel: "Асуулт хариулт",
+  navLabel: "Үнэлгээний асуулт",
   title: "Байгууллагын",
   highlight: "үнэлгээ",
   description:

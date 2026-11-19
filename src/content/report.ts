@@ -47,7 +47,7 @@ export const reportTemplates: ReportTemplate[] = [
   },
   {
     service: "laboratory",
-    title: "Бизнес лабораторийн тайлан",
+    title: "Business Laboratory тайлан",
     subtitle: "Business Laboratory Service",
     metrics: [
       { label: "Процессын үр ашиг", value: "62 / 100", score: 62 },

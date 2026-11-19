@@ -56,7 +56,7 @@ export function NavLinks() {
                               )}
                               <span className="flex flex-col gap-0.5">
                                 <span className="font-medium text-foreground">{child.label}</span>
-                                <span className="text-xs text-muted-foreground">{child.description}</span>
+                                {child.description && <span className="text-xs text-muted-foreground">{child.description}</span>}
                               </span>
                             </Link>
                           </NavigationMenuLink>

@@ -1,11 +1,10 @@
+import { services } from "@/content/services"
 import type { ServiceSlug } from "@/types/content"
 
 export type RequestServiceOption = ServiceSlug | "other"
 
 export const serviceOptions: { value: RequestServiceOption; label: string }[] = [
-  { value: "training", label: "Бизнесийн сургалт (Business Training)" },
-  { value: "laboratory", label: "Бизнес лаборатори (Business Laboratory)" },
-  { value: "update", label: "Бизнесийн шинэчлэл (Business Update)" },
+  ...services.map((service) => ({ value: service.slug, label: service.name })),
   { value: "other", label: "Бусад / зөвлөгөө авах" },
 ]
 

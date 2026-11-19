@@ -45,7 +45,7 @@ test.describe("/contact хүсэлтийн маягт", () => {
 
   test("?service=&package= утгаар урьдчилж бөглөнө", async ({ page }) => {
     await page.goto("/contact?service=laboratory&package=full")
-    await expect(serviceTrigger(page)).toContainText("Бизнес лаборатори")
+    await expect(serviceTrigger(page)).toContainText("Business Laboratory Service")
     await expect(packageTrigger(page)).toContainText("Цогц оношилгоо")
   })
 
@@ -56,14 +56,14 @@ test.describe("/contact хүсэлтийн маягт", () => {
 
     // Багц нь өөр үйлчилгээнийх бол үл тооно
     await page.goto("/contact?service=training&package=full")
-    await expect(serviceTrigger(page)).toContainText("Бизнесийн сургалт")
+    await expect(serviceTrigger(page)).toContainText("Business Training Service")
     await expect(packageTrigger(page)).toContainText("Багц сонгох")
   })
 
   test("үйлчилгээ солиход багцын сонголт шинэчлэгдэнэ", async ({ page }) => {
     await page.goto("/contact?service=training&package=standard")
     await expect(packageTrigger(page)).toContainText("Стандарт")
-    await choose(page, "#service", "Бизнесийн шинэчлэл (Business Update)")
+    await choose(page, "#service", "Business Update Service")
     await expect(packageTrigger(page)).toContainText("Багц сонгох")
     await packageTrigger(page).click()
     await expect(page.getByRole("option", { name: "Цогц шинэчлэл" })).toBeVisible()
@@ -136,6 +136,9 @@ test.describe("/contact хүсэлтийн маягт", () => {
     test("сул цаг сонгож илгээхэд уулзалт бүртгэгдэж, тэр цаг алга болно", async ({ page }, testInfo) => {
       await page.goto("/contact?service=training")
       const picker = page.getByRole("group", { name: "Уулзалтын цаг" })
+      // Уулзах хүн: багийн гишүүнээс сонгоно (нэг календарь тул сул цаг адилхан)
+      await picker.locator("#meetingHost").click()
+      await page.getByRole("option", { name: /Төслийн удирдагч/ }).click()
       const slots = picker.getByRole("radiogroup", { name: /^Сул цаг/ }).getByRole("radio")
       await expect(slots.first()).toBeAttached()
       // desktop, mobile project зэрэг ажиллахад нэг цагийг булаалдахгүй
@@ -150,6 +153,9 @@ test.describe("/contact хүсэлтийн маягт", () => {
       await page.getByRole("button", { name: "Цаг захиалж, хүсэлт илгээх" }).click()
 
       await expect(page.getByRole("status")).toContainText("Уулзалтын цаг баталгаажлаа")
+      await expect(page.getByRole("status")).toContainText("Төслийн удирдагч")
+      // Онлайн (анхдагч) уулзалтад манай Zoom холбоос
+      await expect(page.getByRole("link", { name: "Zoom холбоосоор нэгдэх" })).toHaveAttribute("href", "https://zoom.us/j/1234567890")
       expect(await mailtoCalls(page)).toHaveLength(0)
 
       const res = await page.request.get("/api/booking/availability")

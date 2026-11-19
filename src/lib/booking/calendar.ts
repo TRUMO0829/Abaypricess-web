@@ -15,7 +15,8 @@ export interface NewEvent {
 
 export interface CreatedEvent {
   id: string
-  meetLink?: string
+  /** Онлайн уулзалтын Zoom холбоос */
+  joinLink?: string
 }
 
 export interface CalendarProvider {
@@ -27,6 +28,12 @@ export interface CalendarProvider {
 }
 
 const MINUTE = 60_000
+
+/** Онлайн уулзалтын байнгын Zoom холбоос (`ZOOM_MEETING_URL`, зөвхөн https). */
+export function zoomUrl(): string | undefined {
+  const url = process.env.ZOOM_MEETING_URL?.trim()
+  return url && /^https:\/\//.test(url) ? url : undefined
+}
 
 /* ── Google Calendar (OAuth refresh token, REST API) ─────────────────────────── */
 
@@ -111,23 +118,20 @@ function googleProvider(env: GoogleEnv): CalendarProvider {
     },
     async createEvent(event) {
       const { timeZone, utcOffsetMinutes } = bookingConfig
-      const json = await googleFetch<{ id: string; hangoutLink?: string }>(
+      const zoom = event.mode === "online" ? zoomUrl() : undefined
+      const json = await googleFetch<{ id: string }>(
         env,
-        `/calendars/${encodeURIComponent(env.calendarId)}/events?sendUpdates=all&conferenceDataVersion=1`,
+        `/calendars/${encodeURIComponent(env.calendarId)}/events?sendUpdates=all`,
         {
           summary: event.summary,
-          description: event.description,
+          description: zoom ? `${event.description}\n\nZoom: ${zoom}` : event.description,
           start: { dateTime: toLocalIso(event.start, utcOffsetMinutes), timeZone },
           end: { dateTime: toLocalIso(event.end, utcOffsetMinutes), timeZone },
           attendees: [{ email: event.attendee.email, displayName: event.attendee.name }],
-          location: event.location,
-          conferenceData:
-            event.mode === "online"
-              ? { createRequest: { requestId: crypto.randomUUID(), conferenceSolutionKey: { type: "hangoutsMeet" } } }
-              : undefined,
+          location: zoom ?? event.location,
         }
       )
-      return { id: json.id, meetLink: json.hangoutLink }
+      return { id: json.id, joinLink: zoom }
     },
   }
 }
@@ -190,7 +194,7 @@ const mockProvider: CalendarProvider = {
   async createEvent(event) {
     mockStore.__adaptMockBookings ??= []
     mockStore.__adaptMockBookings.push({ start: event.start, end: event.end })
-    return { id: `mock-${mockStore.__adaptMockBookings.length}` }
+    return { id: `mock-${mockStore.__adaptMockBookings.length}`, joinLink: event.mode === "online" ? zoomUrl() : undefined }
   },
 }
 

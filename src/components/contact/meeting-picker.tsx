@@ -5,8 +5,10 @@ import { AlertCircle, CalendarClock, RotateCw, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   bookingContent as t,
+  meetingHosts,
   meetingDurationValues,
   meetingModeValues,
   type MeetingDuration,
@@ -15,6 +17,7 @@ import {
 import type { AvailabilityResponse } from "@/lib/booking/availability"
 import { addMinutes, formatDayLong, formatMeeting, slotTime } from "@/lib/booking/format"
 import type { AvailableSlot } from "@/lib/booking/slots"
+import { ANY_HOST } from "@/lib/request-schema"
 import { cn } from "@/lib/utils"
 
 /** Сул цагийг хэдэн секунд тутам дахин асуух (табыг дахин нээхэд мөн шинэчилнэ) */
@@ -78,6 +81,9 @@ interface MeetingPickerProps {
   refreshKey: number
   /** Календарьт уулзалт үүсгэж чадах эсэх (API key горимд `false` — цаг хүсэлтэд л орно) */
   onCanBookChange?: (canBook: boolean) => void
+  /** Уулзах багийн гишүүний id ("any" = аль ч зөвлөх) */
+  host: string
+  onHostChange: (value: string) => void
   /** «Очиж уулзах» үеийн хаяг */
   address: string
   onAddressChange: (value: string) => void
@@ -93,6 +99,8 @@ export function MeetingPicker({
   onModeChange,
   refreshKey,
   onCanBookChange,
+  host,
+  onHostChange,
   address,
   onAddressChange,
   addressError,
@@ -166,6 +174,27 @@ export function MeetingPicker({
 
       {load.state === "ready" && load.data.mode === "mock" && (
         <p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">{t.mockNotice}</p>
+      )}
+
+      {meetingHosts.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <label id="meetingHost-label" className="text-sm font-medium">
+            {t.hostLabel}
+          </label>
+          <Select value={host || ANY_HOST} onValueChange={onHostChange}>
+            <SelectTrigger id="meetingHost" aria-labelledby="meetingHost-label" className="w-full bg-background">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ANY_HOST}>{t.anyHost}</SelectItem>
+              {meetingHosts.map((member) => (
+                <SelectItem key={member.id} value={member.id}>
+                  {member.name} · {member.role}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       )}
 
       <div role="radiogroup" aria-label={t.modeLabel} className="grid grid-cols-3 gap-2">
@@ -314,6 +343,7 @@ export function MeetingPicker({
               <span className="block text-xs text-muted-foreground">{t.selected}</span>
               <span className="font-medium">
                 {formatMeeting(start, minutes)} · {t.modes[mode]}
+                {host && host !== ANY_HOST && ` · ${meetingHosts.find((m) => m.id === host)?.name ?? ""}`}
               </span>
             </p>
             <Button type="button" variant="ghost" size="icon-sm" aria-label={t.clear} onClick={() => onStartChange("")}>

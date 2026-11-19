@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { ContactInfo } from "@/components/contact/contact-info"
-import { RequestForm } from "@/components/contact/request-form"
+import { RequestFormSection } from "@/components/contact/request-form-section"
 import { RequestFormSkeleton } from "@/components/contact/request-form-skeleton"
 import { PageHeader } from "@/components/shared/page-header"
 import { contactPage } from "@/content/contact"
@@ -19,9 +19,9 @@ export default function ContactPage() {
       />
       <section className="py-14 md:py-20">
         <div className="container flex flex-col gap-8 lg:gap-12">
-          {/* useSearchParams (?service=&package=) нь runtime өгөгдөл тул Suspense шаардлагатай */}
+          {/* useSearchParams (?service=&package=) болон нэвтрэлтийн cookie нь runtime өгөгдөл тул Suspense шаардлагатай */}
           <Suspense fallback={<RequestFormSkeleton />}>
-            <RequestForm />
+            <RequestFormSection />
           </Suspense>
           <ContactInfo />
         </div>

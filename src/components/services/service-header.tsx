@@ -28,12 +28,9 @@ export function ServiceHeader({ service }: { service: Service }) {
         </nav>
 
         <div className="flex flex-col items-start gap-6">
-          <div className="flex items-center gap-4">
-            <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
-              <Icon className="size-7" aria-hidden />
-            </span>
-            <span className="text-sm font-semibold tracking-wide text-primary uppercase">{service.nameEn}</span>
-          </div>
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+            <Icon className="size-7" aria-hidden />
+          </span>
           <h1 className="text-3xl font-bold text-balance md:text-5xl">{service.name}</h1>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <Button asChild size="lg">

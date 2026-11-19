@@ -17,7 +17,7 @@ export async function resolveService(params: SlugParams): Promise<Service> {
   return service
 }
 
-/** Дэд хуудасны metadata: "Үнийн санал · Бизнесийн сургалт". */
+/** Дэд хуудасны metadata: "Үнийн санал · Business Training Service". */
 export async function serviceMetadata(params: SlugParams, label?: string): Promise<Metadata> {
   const { slug } = await params
   const service = getService(slug)

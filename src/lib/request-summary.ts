@@ -1,4 +1,4 @@
-import { bookingContent } from "@/content/booking"
+import { bookingContent, meetingHosts } from "@/content/booking"
 import { company } from "@/content/company"
 import { serviceOptions } from "@/content/contact"
 import { getService } from "@/content/services"
@@ -30,6 +30,12 @@ export function buildRequestLines(data: RequestInput): string[] {
   ].filter((line): line is string => line !== null)
 }
 
+/** "Овог Нэр (Төслийн удирдагч)" эсвэл «Аль ч зөвлөх» */
+export function getHostLabel(hostId?: string): string {
+  const host = meetingHosts.find((member) => member.id === hostId)
+  return host ? `${host.name} (${host.role})` : bookingContent.anyHost
+}
+
 /** Сонгосон уулзалтын цагийн мөрүүд (цаг сонгоогүй бол хоосон). */
 export function buildMeetingLines(data: RequestInput): string[] {
   if (!data.meetingStart || !data.meetingDuration || !data.meetingMode) return []
@@ -37,7 +43,8 @@ export function buildMeetingLines(data: RequestInput): string[] {
   return [
     "",
     `${bookingContent.mailMeetingLabel}: ${formatMeeting(data.meetingStart, minutes)}`,
-    `${bookingContent.modeLabel}: ${bookingContent.modes[data.meetingMode]}`,
+    `${bookingContent.hostLabel}: ${getHostLabel(data.meetingHost)}`,
+    `${bookingContent.modeLabel}: ${bookingContent.modes[data.meetingMode]}${data.meetingMode === "online" ? " (Zoom)" : ""}`,
     ...(data.meetingMode === "visit" && data.meetingAddress ? [`${bookingContent.addressLabel}: ${data.meetingAddress}`] : []),
   ]
 }

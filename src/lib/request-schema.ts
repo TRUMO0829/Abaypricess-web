@@ -1,10 +1,13 @@
 import { z } from "zod"
 
-import { meetingDurationValues, meetingModeValues } from "@/content/booking"
+import { meetingDurationValues, meetingHosts, meetingModeValues } from "@/content/booking"
 import { getService } from "@/content/services"
 
 /** Багц сонгоогүй гэдгийг илэрхийлэх Select-ийн утга (Radix Select хоосон утга зөвшөөрдөггүй). */
 export const UNDECIDED_PACKAGE = "undecided"
+
+/** «Аль ч зөвлөх» — Select хоосон утга зөвшөөрдөггүй */
+export const ANY_HOST = "any"
 
 export const requestServiceValues = ["training", "laboratory", "update", "other"] as const
 
@@ -69,6 +72,12 @@ export const requestSchema = z
       .refine((value) => !value || MEETING_START_REGEX.test(value), { error: "Уулзалтын цаг буруу байна" }),
     meetingDuration: z.enum(meetingDurationValues).optional(),
     meetingMode: z.enum(meetingModeValues).optional(),
+    /** Багийн гишүүний id; хоосон = аль ч зөвлөх */
+    meetingHost: z
+      .string()
+      .optional()
+      .transform((value) => (value && value !== ANY_HOST ? value : undefined))
+      .refine((value) => !value || meetingHosts.some((host) => host.id === value), { error: "Уулзах хүн буруу байна" }),
     /** «Очиж уулзах» үед заавал */
     meetingAddress: optionalText(200, "200 тэмдэгтээс хэтрэхгүй"),
   })

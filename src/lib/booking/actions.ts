@@ -5,11 +5,11 @@ import { headers } from "next/headers"
 import { bookingContent } from "@/content/booking"
 import { company } from "@/content/company"
 import { getCalendarProvider, isSlotFree } from "@/lib/booking/availability"
-import { buildMailto, buildMeetingLines, buildRequestLines, getServiceLabel } from "@/lib/request-summary"
+import { buildMailto, buildMeetingLines, buildRequestLines, getHostLabel, getServiceLabel } from "@/lib/request-summary"
 import { requestSchema } from "@/lib/request-schema"
 
 export type BookingResult =
-  | { status: "booked"; start: string; duration: number; mode: "online" | "office" | "visit"; address?: string; meetLink?: string }
+  | { status: "booked"; start: string; duration: number; mode: "online" | "office" | "visit"; address?: string; host?: string; joinLink?: string }
   | { status: "slot-taken"; message: string }
   /** Календарь зөвхөн унших горимд: сонгосон цагтай имэйлийг хэрэглэгч өөрөө илгээнэ */
   | { status: "mailto"; href: string }
@@ -66,7 +66,7 @@ export async function createBooking(input: unknown, honeypot?: string): Promise<
     const event = await provider.createEvent({
       start,
       end: start + minutes * 60_000,
-      summary: `Уулзалт: ${data.organization} — ${getServiceLabel(data.service)}`,
+      summary: `Уулзалт: ${data.organization} — ${getServiceLabel(data.service)}${data.meetingHost ? ` · ${getHostLabel(data.meetingHost)}` : ""}`,
       description: [...buildRequestLines(data), ...buildMeetingLines(data)].join("\n"),
       attendee: { email: data.email, name: data.name },
       mode: data.meetingMode,
@@ -84,7 +84,8 @@ export async function createBooking(input: unknown, honeypot?: string): Promise<
       duration: minutes,
       mode: data.meetingMode,
       address: data.meetingMode === "visit" ? data.meetingAddress : undefined,
-      meetLink: event.meetLink,
+      host: getHostLabel(data.meetingHost),
+      joinLink: event.joinLink,
     }
   } catch (error) {
     console.error("[booking]", error)

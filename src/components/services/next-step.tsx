@@ -21,7 +21,7 @@ export function NextStep({ slug }: { slug: ServiceSlug }) {
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-1.5">
         <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-          {eyebrow} · <span className="text-primary">{next.nameEn}</span>
+          {eyebrow}
         </span>
         <span className="font-heading text-xl font-bold">{next.name}</span>
         <span className="text-sm text-muted-foreground">{next.shortDescription}</span>

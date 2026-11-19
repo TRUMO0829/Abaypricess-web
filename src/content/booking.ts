@@ -1,3 +1,5 @@
+import { team } from "@/content/team"
+
 /** Уулзалтын цаг захиалгын хуваарь. Google Calendar-ын сул цаг эдгээр дүрмээр шүүгдэнэ. */
 export const bookingConfig = {
   timeZone: "Asia/Ulaanbaatar",
@@ -23,6 +25,9 @@ export const bookingConfig = {
 
 /** min…max хооронд step-ээр — `minMeetingMinutes` гэх мэт өөрчлөгдвөл энд нэмнэ */
 export const meetingDurationValues = ["30", "45", "60"] as const
+/** «Уулзах хүн»-д сонгогдох багийн гишүүд (`src/content/team.ts`, id-тай) */
+export const meetingHosts = team.filter((member): member is typeof member & { id: string } => Boolean(member.id))
+
 export const meetingModeValues = ["visit", "office", "online"] as const
 export type MeetingDuration = (typeof meetingDurationValues)[number]
 export type MeetingMode = (typeof meetingModeValues)[number]
@@ -31,6 +36,9 @@ export const bookingContent = {
   title: "Уулзалтын цаг",
   durationLabel: "Дуусах цаг",
   durations: { "30": "30 минут", "45": "45 минут", "60": "1 цаг" } satisfies Record<MeetingDuration, string>,
+  hostLabel: "Уулзах хүн",
+  /** Сонгоогүй үед — байгууллага нэг календарьтай тул сул цаг адилхан */
+  anyHost: "Аль ч зөвлөх",
   modeLabel: "Уулзах газар",
   modes: { visit: "Очиж уулзах", office: "Оффист урих", online: "Онлайн" } satisfies Record<MeetingMode, string>,
   /** «Очиж уулзах» үед харилцагчийн хаяг */
@@ -56,8 +64,8 @@ export const bookingContent = {
     booked: {
       title: "Уулзалтын цаг баталгаажлаа",
       description: "Хүсэлт тань хүлээн авлаа. Уулзалтын урилга таны имэйл рүү илгээгдсэн.",
-      meet: "Google Meet холбоос урилгад орсон байгаа.",
-      meetLink: "Google Meet холбоос",
+      meet: "Zoom холбоос урилгад орсон байгаа.",
+      meetLink: "Zoom холбоосоор нэгдэх",
       office: "Уулзалт манай оффист болно:",
       visit: "Манай зөвлөх дараах хаягаар очиж уулзана:",
       again: "Шинэ хүсэлт илгээх",

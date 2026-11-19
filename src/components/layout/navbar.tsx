@@ -1,5 +1,8 @@
+import { Suspense } from "react"
 import Link from "next/link"
 
+import { AccountMenu } from "@/components/layout/account-menu"
+import { AccountSlot } from "@/components/layout/account-slot"
 import { Logo } from "@/components/layout/logo"
 import { MobileNav } from "@/components/layout/mobile-nav"
 import { ModeToggle } from "@/components/layout/mode-toggle"
@@ -17,6 +20,9 @@ export function Navbar() {
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <ModeToggle />
+          <Suspense fallback={<AccountMenu account={null} />}>
+            <AccountSlot />
+          </Suspense>
           <Button asChild className="hidden sm:inline-flex">
             <Link href={requestCta.href}>{requestCta.label}</Link>
           </Button>

@@ -3,10 +3,10 @@ import { ServiceRoute, ServiceSection, serviceMetadata } from "@/components/serv
 import { serviceDetailContent } from "@/content/services"
 
 export function generateMetadata({ params }: PageProps<"/services/[slug]/assessment">) {
-  return serviceMetadata(params, "Асуулт хариулт")
+  return serviceMetadata(params, "Үнэлгээний асуулт")
 }
 
-/** Үйлчилгээ бүрийн «Асуулт хариулт» tab — `/assessment`-тэй ижил байгууллагын үнэлгээ (ноорог нь хуваалцагдана). */
+/** Үйлчилгээ бүрийн «Үнэлгээний асуулт» tab — `/assessment`-тэй ижил байгууллагын үнэлгээ (ноорог нь хуваалцагдана). */
 export default function AssessmentTabPage({ params }: PageProps<"/services/[slug]/assessment">) {
   const t = serviceDetailContent.assessment
   return (

@@ -7,23 +7,19 @@ export const mainNav: NavItem[] = [
     href: "/services",
     children: [
       {
-        label: "Бизнесийн сургалт",
+        label: "Business Training Service",
         href: "/services/training",
-        description: "Business Training Service",
       },
       {
-        label: "Бизнес лаборатори",
+        label: "Business Laboratory Service",
         href: "/services/laboratory",
-        description: "Business Laboratory Service",
       },
       {
-        label: "Бизнесийн шинэчлэл",
+        label: "Business Update Service",
         href: "/services/update",
-        description: "Business Update Service",
       },
     ],
   },
-  { label: "Асуулт хариулт", href: "/assessment" },
   { label: "Холбоо барих", href: "/contact" },
 ]
 
@@ -36,7 +32,7 @@ export const footerNav = {
     title: "Компани",
     items: [
       { label: "Бүх үйлчилгээ", href: "/services" },
-      { label: "Байгууллагын үнэлгээ", href: "/assessment" },
+      { label: "Үнэлгээний асуулт", href: "/assessment" },
       { label: "Хүсэлт илгээх", href: "/contact" },
     ] satisfies NavItem[],
   },

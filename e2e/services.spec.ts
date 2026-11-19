@@ -37,7 +37,7 @@ test.describe("Үйлчилгээний цэс (1 мэдээлэл = 1 хууд�
   test("tab бүр өөрийн хуудсыг нээж, идэвхтэй tab шилжинэ", async ({ page }) => {
     await page.goto("/services/training")
     const tabs = page.getByRole("navigation", { name: "Үйлчилгээний цэс" })
-    await expect(tabs.getByRole("link")).toHaveText(["Тойм", "Хөтөлбөр", "Сургагч багш", "Үнийн санал", "Тайлан", "Асуулт хариулт"])
+    await expect(tabs.getByRole("link")).toHaveText(["Тойм", "Хөтөлбөр", "Сургагч багш", "Үнийн санал", "Тайлан", "Үнэлгээний асуулт"])
     await expect(tabs.getByRole("link", { name: "Тойм" })).toHaveAttribute("aria-current", "page")
 
     await tabs.getByRole("link", { name: "Тайлан" }).click()

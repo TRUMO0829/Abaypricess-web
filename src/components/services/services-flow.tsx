@@ -22,9 +22,6 @@ export function ServicesFlow() {
               </span>
 
               <div className="flex flex-1 flex-col gap-2">
-                <span className="text-xs font-semibold tracking-wide text-primary uppercase">
-                  {service.nameEn}
-                </span>
                 <h3 className="text-lg leading-snug font-semibold">
                   <Link
                     href={`/services/${service.slug}`}

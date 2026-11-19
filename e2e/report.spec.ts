@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 
 const reports = [
   { path: "/services/training/report", title: "Сургалтын үр дүнгийн тайлан" },
-  { path: "/services/laboratory/report", title: "Бизнес лабораторийн тайлан" },
+  { path: "/services/laboratory/report", title: "Business Laboratory тайлан" },
   { path: "/services/update/report", title: "Шинэчлэлийн үр дүнгийн тайлан" },
 ]
 

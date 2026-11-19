@@ -82,7 +82,6 @@ export interface Service {
   slug: ServiceSlug
   order: number
   name: string
-  nameEn: string
   icon: LucideIcon
   shortDescription: string
   description: string
@@ -92,11 +91,13 @@ export interface Service {
   /** Сургагч багш нар (Сургагч багш tab) */
   trainers?: TeamMember[]
   packages: PricePackage[]
-  /** Диаграмм дээрх баримтын нэр, ж: "Сургалтын үйлчилгээ, үнийн санал" */
+  /** Диаграмм дээрх баримтын нэр, ж: "Business Training үйлчилгээ, үнийн санал" */
   deliverable: string
 }
 
 export interface TeamMember {
+  /** Тогтвортой id — «Уулзах хүн» сонголтод (нэр солигдсон ч хадгалсан утга хүчинтэй) */
+  id?: string
   name: string
   role: string
   /** `public/team/` доторх зураг, ж: "/team/bat.jpg". Байхгүй бол нэрийн эхний үсэг харагдана. */
@@ -106,6 +107,9 @@ export interface TeamMember {
   experience: string[]
   /** CV: ур чадвар */
   expertise: string[]
+  /** CV-ийн «Холбоо барих» хэсэг */
+  phone?: string
+  email?: string
 }
 export interface ReportMetric {
   label: string

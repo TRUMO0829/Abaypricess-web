@@ -7,8 +7,7 @@ export const services: Service[] = [
   {
     slug: "training",
     order: 1,
-    name: "Бизнесийн сургалтын үйлчилгээ",
-    nameEn: "Business Training Service",
+    name: "Business Training Service",
     icon: BookOpen,
     shortDescription:
       "Удирдлага, борлуулалт, санхүү, үйл ажиллагааны чиглэлээр байгууллагын хэрэгцээнд тохирсон практик сургалт.",
@@ -143,6 +142,8 @@ export const services: Service[] = [
         summary: "Дунд шатны удирдлагад зориулсан манлайллын хөтөлбөрүүдийг 10 гаруй жил заасан.",
         experience: ["Ахлах сургагч — 20XX оноос", "Хүний нөөцийн менежер — 20XX–20XX"],
         expertise: ["Манлайлал", "Баг удирдах ур чадвар"],
+        phone: "+976 0000 0000",
+        email: "name@adaptmanagement.mn",
       },
       {
         name: "Овог Нэр",
@@ -150,6 +151,8 @@ export const services: Service[] = [
         summary: "Борлуулалтын баг бэлтгэх, харилцагчийн туршлага сайжруулах сургалт явуулдаг.",
         experience: ["Сургагч — 20XX оноос", "Борлуулалтын менежер — 20XX–20XX"],
         expertise: ["Борлуулалтын арга зүй", "Харилцагчийн үйлчилгээ"],
+        phone: "+976 0000 0000",
+        email: "name@adaptmanagement.mn",
       },
       {
         name: "Овог Нэр",
@@ -157,20 +160,21 @@ export const services: Service[] = [
         summary: "Санхүүгийн бус удирдлагад зориулсан санхүүгийн мэдлэг, процессын сургалт заадаг.",
         experience: ["Сургагч — 20XX оноос", "Санхүүгийн шинжээч — 20XX–20XX"],
         expertise: ["Санхүүгийн шинжилгээ", "Төсөв төлөвлөлт"],
+        phone: "+976 0000 0000",
+        email: "name@adaptmanagement.mn",
       },
     ],
-    deliverable: "Сургалтын үйлчилгээ, үнийн санал",
+    deliverable: "Business Training үйлчилгээ, үнийн санал",
   },
   {
     slug: "laboratory",
     order: 2,
-    name: "Бизнес лаборатори үйлчилгээ",
-    nameEn: "Business Laboratory Service",
+    name: "Business Laboratory Service",
     icon: FlaskConical,
     shortDescription:
       "Байгууллагын үйл ажиллагаа, процесс, санхүүг оношилж, сайжруулах боломжийг тоо баримтаар тодорхойлно.",
     description:
-      "Бизнес лаборатори нь байгууллагын одоогийн байдлыг өгөгдөлд тулгуурлан шинжилж, гол асуудал, эрсдэл, өсөлтийн боломжийг илрүүлдэг оношилгооны үйлчилгээ юм. Шинжилгээний үр дүнд хэрэгжүүлэх боломжтой зөвлөмжийг тэргүүлэх ач холбогдлоор нь эрэмбэлж өгнө.",
+      "Business Laboratory нь байгууллагын одоогийн байдлыг өгөгдөлд тулгуурлан шинжилж, гол асуудал, эрсдэл, өсөлтийн боломжийг илрүүлдэг оношилгооны үйлчилгээ юм. Шинжилгээний үр дүнд хэрэгжүүлэх боломжтой зөвлөмжийг тэргүүлэх ач холбогдлоор нь эрэмбэлж өгнө.",
     benefits: [
       "Өгөгдөлд суурилсан бодит дүгнэлт",
       "Процесс, санхүү, зах зээлийн цогц шинжилгээ",
@@ -205,7 +209,7 @@ export const services: Service[] = [
         title: "Зөвлөмж ба танилцуулга",
         summary: "Сайжруулах арга хэмжээг эрэмбэлж, удирдлагад танилцуулна.",
         details: ["Хурдан хэрэгжих шийдлүүд", "Дунд хугацааны сайжруулалт", "Хэрэгжүүлэх замын зураг"],
-        deliverable: "Бизнес лабораторийн тайлан",
+        deliverable: "Business Laboratory тайлан",
         duration: "3–5 хоног",
       },
     ],
@@ -247,8 +251,7 @@ export const services: Service[] = [
   {
     slug: "update",
     order: 3,
-    name: "Бизнесийн шинэчлэлийн үйлчилгээ",
-    nameEn: "Business Update Service",
+    name: "Business Update Service",
     icon: RefreshCw,
     shortDescription:
       "Лабораторийн зөвлөмжийг бодит өөрчлөлт болгон хэрэгжүүлж, байгууллагын процесс, бүтцийг шинэчилнэ.",
@@ -371,7 +374,7 @@ const serviceTabs = [
   { id: "trainers", segment: "trainers", label: "Сургагч багш" },
   { id: "pricing", segment: "pricing", label: "Үнийн санал" },
   { id: "report", segment: "report", label: "Тайлан" },
-  { id: "assessment", segment: "assessment", label: "Асуулт хариулт" },
+  { id: "assessment", segment: "assessment", label: "Үнэлгээний асуулт" },
 ] as const
 
 export type ServiceTabId = (typeof serviceTabs)[number]["id"]
@@ -418,7 +421,7 @@ export const serviceDetailContent = {
     note: "Үнэ НӨАТ ороогүй, урьдчилсан суурь үнэ болно. Эцсийн үнийн санал нь байгууллагын хэмжээ, хамрах хүрээ, хугацаанаас хамаарна.",
   },
   assessment: {
-    eyebrow: "Асуулт хариулт",
+    eyebrow: "Үнэлгээний асуулт",
     title: "Байгууллагын",
     highlight: "үнэлгээ",
     description:

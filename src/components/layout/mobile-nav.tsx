@@ -68,7 +68,7 @@ export function MobileNav() {
                             {Icon && <Icon className="size-4 shrink-0 text-primary" aria-hidden />}
                             <span className="flex flex-col">
                               <span className="text-sm font-medium">{child.label}</span>
-                              <span className="text-xs text-muted-foreground">{child.description}</span>
+                              {child.description && <span className="text-xs text-muted-foreground">{child.description}</span>}
                             </span>
                           </Link>
                         </li>
