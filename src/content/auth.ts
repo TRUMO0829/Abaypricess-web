@@ -31,7 +31,7 @@ export const authContent = {
     company: { label: "Компанийн нэр", placeholder: "Компанийн нэр" },
     position: { label: "Албан тушаал", placeholder: "Ж: Хүний нөөцийн менежер" },
     phone: { label: "Утасны дугаар", placeholder: "9911 2233" },
-    password: { label: "Нууц үг", placeholder: "Дор хаяж 8 тэмдэгт" },
+    password: { label: "Нууц үг", placeholder: "Дор хаяж 4 тэмдэгт" },
     confirmPassword: { label: "Нууц үг давтах", placeholder: "" },
   },
   /** Хүсэлтийн маягтын дээрх мөр */

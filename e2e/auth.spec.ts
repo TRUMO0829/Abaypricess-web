@@ -70,7 +70,7 @@ test.describe("нэвтрэх, бүртгүүлэх", () => {
     await page.getByRole("button", { name: "Бүртгүүлэх" }).click()
     await expect(page.getByText("Нэрээ оруулна уу", { exact: true })).toBeVisible()
     await expect(page.getByText("Компанийн нэрээ оруулна уу")).toBeVisible()
-    await expect(page.getByText(/Нууц үг дор хаяж 8/)).toBeVisible()
+    await expect(page.getByText(/Нууц үг дор хаяж 4/)).toBeVisible()
 
     const phone = randomPhone()
     const other = await browser.newContext()
@@ -96,4 +96,23 @@ test.describe("нэвтрэх, бүртгүүлэх", () => {
     await register(page, randomPhone(), "//evil.example.com")
     await expect(page).toHaveURL(/localhost:\d+\/$/)
   })
+})
+
+test("4 тэмдэгттэй нууц үгээр бүртгүүлж, нэвтэрнэ; 3 тэмдэгт хүрэлцэхгүй", async ({ page }) => {
+  const phone = randomPhone()
+  await page.goto("/register")
+  await field(page, "name").fill("Сараа")
+  await field(page, "phone").fill(phone)
+  await field(page, "company").fill("Дөрөв ХХК")
+  await field(page, "position").fill("Менежер")
+  await field(page, "password").fill("123")
+  await field(page, "confirmPassword").fill("123")
+  await page.getByRole("button", { name: "Бүртгүүлэх" }).click()
+  await expect(page.getByText(/Нууц үг дор хаяж 4/)).toBeVisible()
+
+  await field(page, "password").fill("1234")
+  await field(page, "confirmPassword").fill("1234")
+  await page.getByRole("button", { name: "Бүртгүүлэх" }).click()
+  await expect(page).toHaveURL(/localhost:\d+\/$/)
+  await expect(accountButton(page)).toBeVisible()
 })

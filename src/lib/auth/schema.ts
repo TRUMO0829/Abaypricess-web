@@ -15,7 +15,7 @@ const phone = z
   .regex(MN_PHONE_REGEX, { error: "Утасны дугаар 8 оронтой байна (ж: 9911 2233)" })
   .transform(normalizePhone)
 
-export const PASSWORD_MIN = 8
+export const PASSWORD_MIN = 4
 /** bcrypt 72 байтаас хойшхийг үл тоодог */
 export const PASSWORD_MAX = 72
 
