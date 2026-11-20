@@ -20,6 +20,13 @@ export const homeSections = {
      * Танилцуулга бичлэг. YouTube-ийн дурын холбоос (watch?v=…, youtu.be/…, shorts/…).
      * TODO: захиалагчийн бичлэгийн холбоосоор солих. Хоосон бол түр зураг харагдана.
      */
+    /** Байгууллагын танилцуулга PDF (`public/docs/`) — дарахад татагдана */
+    brochure: {
+      label: "Дэлгэрэнгүй мэдээлэл үзэх",
+      href: "/docs/adapt-management-tanilcuulga.pdf",
+      fileName: "Adapt Management - Байгууллагын танилцуулга.pdf",
+      meta: "PDF · 4 хуудас · 450 KB",
+    },
     video: {
       url: "",
       title: "Адапт Менежмент — танилцуулга бичлэг",

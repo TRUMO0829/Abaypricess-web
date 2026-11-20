@@ -97,3 +97,16 @@ test("нүүр: бичлэгийн байр, эрхэм зорилго/алсы�
   // Бичлэгийн холбоос тохируулаагүй үед түр зураг, тохируулсан бол iframe
   await expect(about.locator('iframe[src*="youtube-nocookie.com/embed/"], :text("Танилцуулга бичлэг удахгүй")').first()).toBeVisible()
 })
+
+test("нүүр: «Дэлгэрэнгүй мэдээлэл үзэх» байгууллагын танилцуулга PDF-ийг татна", async ({ page }) => {
+  await page.goto("/")
+  const link = page.locator("#about").getByRole("link", { name: "Дэлгэрэнгүй мэдээлэл үзэх" })
+  await expect(link).toHaveAttribute("href", "/docs/adapt-management-tanilcuulga.pdf")
+  await expect(link).toHaveAttribute("download", /Байгууллагын танилцуулга\.pdf$/)
+  const res = await page.request.get("/docs/adapt-management-tanilcuulga.pdf")
+  expect(res.status()).toBe(200)
+  expect(res.headers()["content-type"]).toContain("application/pdf")
+  const download = page.waitForEvent("download")
+  await link.click()
+  expect((await download).suggestedFilename()).toMatch(/Байгууллагын танилцуулга\.pdf$/)
+})
