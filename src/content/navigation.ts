@@ -34,6 +34,7 @@ export const footerNav = {
       { label: "Бүх үйлчилгээ", href: "/services" },
       { label: "Үнэлгээний асуулт", href: "/assessment" },
       { label: "Хүсэлт илгээх", href: "/contact" },
+      { label: "Нууцлалын бодлого", href: "/privacy" },
     ] satisfies NavItem[],
   },
   contactTitle: "Холбоо барих",

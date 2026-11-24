@@ -14,6 +14,7 @@ const routes = [
   "/services/laboratory/assessment",
   "/assessment",
   "/contact",
+  "/privacy",
 ]
 
 for (const route of routes) {
