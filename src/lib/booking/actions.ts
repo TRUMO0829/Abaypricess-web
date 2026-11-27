@@ -2,10 +2,9 @@
 
 import { headers } from "next/headers"
 
-import { bookingContent } from "@/content/booking"
-import { company } from "@/content/company"
 import { getCalendarProvider, isSlotFree } from "@/lib/booking/availability"
-import { buildMailto, buildMeetingLines, buildRequestLines, getHostLabel, getServiceLabel } from "@/lib/request-summary"
+import { getSiteContent } from "@/lib/content"
+import { buildMailto, buildMeetingLines, buildRequestLines, getHostLabel, getServiceLabel, toRequestContent } from "@/lib/request-summary"
 import { requestSchema } from "@/lib/request-schema"
 
 export type BookingResult =
@@ -45,6 +44,13 @@ export async function createBooking(input: unknown, honeypot?: string): Promise<
     return { status: "error", message: "Уулзалтын цагаа сонгоно уу." }
   }
 
+  const content = await getSiteContent()
+  const ctx = toRequestContent(content)
+  const { bookingContent, company } = content
+  if (data.meetingHost && !ctx.hosts.some((host) => host.id === data.meetingHost)) {
+    return { status: "error", message: "Уулзах хүн буруу байна." }
+  }
+
   const provider = getCalendarProvider()
   if (!provider) return { status: "error", message: bookingContent.unavailable }
 
@@ -59,15 +65,15 @@ export async function createBooking(input: unknown, honeypot?: string): Promise<
     }
 
     // API key горим: календарьт бичих эрхгүй тул сонгосон цагийг хүсэлтийн имэйлд оруулна
-    if (!provider.createEvent) return { status: "mailto", href: buildMailto(data) }
+    if (!provider.createEvent) return { status: "mailto", href: buildMailto(ctx, data) }
 
     const minutes = Number(data.meetingDuration)
     const start = Date.parse(data.meetingStart)
     const event = await provider.createEvent({
       start,
       end: start + minutes * 60_000,
-      summary: `Уулзалт: ${data.organization} — ${getServiceLabel(data.service)}${data.meetingHost ? ` · ${getHostLabel(data.meetingHost)}` : ""}`,
-      description: [...buildRequestLines(data), ...buildMeetingLines(data)].join("\n"),
+      summary: `Уулзалт: ${data.organization} — ${getServiceLabel(ctx, data.service)}${data.meetingHost ? ` · ${getHostLabel(ctx, data.meetingHost)}` : ""}`,
+      description: [...buildRequestLines(ctx, data), ...buildMeetingLines(ctx, data)].join("\n"),
       attendee: { email: data.email, name: data.name },
       mode: data.meetingMode,
       location:
@@ -84,7 +90,7 @@ export async function createBooking(input: unknown, honeypot?: string): Promise<
       duration: minutes,
       mode: data.meetingMode,
       address: data.meetingMode === "visit" ? data.meetingAddress : undefined,
-      host: getHostLabel(data.meetingHost),
+      host: getHostLabel(ctx, data.meetingHost),
       joinLink: event.joinLink,
     }
   } catch (error) {

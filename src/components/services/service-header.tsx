@@ -3,13 +3,15 @@ import { ArrowRight, ChevronRight } from "lucide-react"
 
 import { ServiceTabs } from "@/components/services/service-tabs"
 import { Button } from "@/components/ui/button"
-import { getServiceTabs, serviceDetailContent } from "@/content/services"
+import { getServiceTabs } from "@/content/services"
+import { getSiteContent } from "@/lib/content"
 import type { Service } from "@/types/content"
 
 /** Үйлчилгээний бүх дэд хуудсанд нийтлэг толгой: нэр, захиалах товч, цэс. */
-export function ServiceHeader({ service }: { service: Service }) {
+export async function ServiceHeader({ service }: { service: Service }) {
+  const { serviceDetailContent } = await getSiteContent()
   const Icon = service.icon
-  const tabs = getServiceTabs(service)
+  const tabs = getServiceTabs(service, serviceDetailContent.tabs)
   const pricing = tabs.find((tab) => tab.id === "pricing")
 
   return (
@@ -35,13 +37,13 @@ export function ServiceHeader({ service }: { service: Service }) {
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <Button asChild size="lg">
               <Link href={`/contact?service=${service.slug}`}>
-                Захиалах
+                {serviceDetailContent.hero.order}
                 <ArrowRight data-icon="inline-end" aria-hidden />
               </Link>
             </Button>
             {pricing && (
               <Button asChild size="lg" variant="outline">
-                <Link href={pricing.href}>Үнийн санал үзэх</Link>
+                <Link href={pricing.href}>{serviceDetailContent.hero.viewPricing}</Link>
               </Button>
             )}
           </div>

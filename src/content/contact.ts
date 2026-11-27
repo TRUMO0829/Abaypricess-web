@@ -1,13 +1,3 @@
-import { services } from "@/content/services"
-import type { ServiceSlug } from "@/types/content"
-
-export type RequestServiceOption = ServiceSlug | "other"
-
-export const serviceOptions: { value: RequestServiceOption; label: string }[] = [
-  ...services.map((service) => ({ value: service.slug, label: service.name })),
-  { value: "other", label: "Бусад / зөвлөгөө авах" },
-]
-
 export const contactPage = {
   title: "Хүсэлт илгээх",
   description:
@@ -17,6 +7,8 @@ export const contactPage = {
 /** Хүсэлтийн маягтын шошго, placeholder, төлөвийн мессеж. */
 export const requestFormContent = {
   title: "Хүсэлтийн маягт",
+  /** «Үйлчилгээ» сонголтын сүүлийн мөр (бусад 3 нь үйлчилгээний нэр) */
+  otherService: "Бусад / зөвлөгөө авах",
   requiredNote: "* тэмдэгтэй талбарыг заавал бөглөнө.",
   fields: {
     name: { label: "Нэр", placeholder: "Бат-Эрдэнэ" },
@@ -40,7 +32,8 @@ export const requestFormContent = {
   optional: "(заавал биш)",
   submit: "Хүсэлт илгээх",
   submitting: "Илгээж байна…",
-  invalidSummary: (count: number) => `Маягтад ${count} алдаа байна. Тэмдэглэсэн талбаруудыг засна уу.`,
+  /** {count} — алдааны тоо */
+  invalidSummary: "Маягтад {count} алдаа байна. Тэмдэглэсэн талбаруудыг засна уу.",
   status: {
     sent: {
       title: "Хүсэлт тань хүлээн авлаа",

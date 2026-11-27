@@ -1,12 +1,14 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
-import { getStartingPrice, services, servicesPageContent } from "@/content/services"
+import { getStartingPrice } from "@/content/services"
+import { getSiteContent } from "@/lib/content"
 import { formatMNT } from "@/lib/format"
 
 /** Үндсэн 3 үйлчилгээний карт. */
-export function ServicesFlow() {
-  const { startingFrom } = servicesPageContent.flow
+export async function ServicesFlow() {
+  const { services, servicesPageContent } = await getSiteContent()
+  const { startingFrom, more } = servicesPageContent.flow
 
   return (
     <ul className="grid gap-4 md:gap-6 lg:grid-cols-3">
@@ -39,7 +41,7 @@ export function ServicesFlow() {
                   <span className="font-heading text-base font-bold">{formatMNT(startingPrice)}</span>
                 </p>
                 <span className="flex shrink-0 items-center gap-1 text-sm font-medium text-primary">
-                  Дэлгэрэнгүй
+                  {more}
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
                 </span>
               </div>

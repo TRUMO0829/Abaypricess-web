@@ -1,9 +1,9 @@
 import { Clock, Mail, MapPin, Phone } from "lucide-react"
 
-import { company } from "@/content/company"
-import { contactInfoContent } from "@/content/contact"
+import { getSiteContent } from "@/lib/content"
 
-export function ContactInfo() {
+export async function ContactInfo() {
+  const { company, contactInfoContent } = await getSiteContent()
   const { phone, email, address, hours } = company.contact
   const { title, labels, stepsTitle, steps } = contactInfoContent
 
@@ -49,7 +49,7 @@ export function ContactInfo() {
         </h2>
         <ol className="mt-5 flex flex-col">
           {steps.map((step, i) => (
-            <li key={step.title} className="relative flex gap-4 pb-6 last:pb-0">
+            <li key={`${i}-${step.title}`} className="relative flex gap-4 pb-6 last:pb-0">
               {i < steps.length - 1 && (
                 <span aria-hidden className="absolute top-9 bottom-1 left-4 w-px -translate-x-1/2 bg-border" />
               )}

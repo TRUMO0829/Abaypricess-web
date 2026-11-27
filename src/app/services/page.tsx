@@ -4,15 +4,15 @@ import { ServicesFlow } from "@/components/services/services-flow"
 import { CtaBanner } from "@/components/shared/cta-banner"
 import { PageHeader } from "@/components/shared/page-header"
 import { SectionHeading } from "@/components/shared/section-heading"
-import { servicesPageContent } from "@/content/services"
+import { getSiteContent } from "@/lib/content"
 
-export const metadata: Metadata = {
-  title: "Үйлчилгээ",
-  description: servicesPageContent.header.description,
+export async function generateMetadata(): Promise<Metadata> {
+  const { servicesPageContent } = await getSiteContent()
+  return { title: "Үйлчилгээ", description: servicesPageContent.header.description }
 }
 
-export default function ServicesPage() {
-  const { header, flow } = servicesPageContent
+export default async function ServicesPage() {
+  const { header, flow } = (await getSiteContent()).servicesPageContent
 
   return (
     <>

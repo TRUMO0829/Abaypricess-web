@@ -332,13 +332,14 @@ export const services: Service[] = [
   },
 ]
 
-export function getService(slug: string): Service | undefined {
-  return services.find((service) => service.slug === slug)
+/** `list` — админы засвар орсон жагсаалт (`getSiteContent().services`). Өгөөгүй бол кодын default. */
+export function getService(slug: string, list: Service[] = services): Service | undefined {
+  return list.find((service) => service.slug === slug)
 }
 
-export function getNextService(slug: ServiceSlug): Service | undefined {
-  const current = getService(slug)
-  return current && services.find((service) => service.order === current.order + 1)
+export function getNextService(slug: ServiceSlug, list: Service[] = services): Service | undefined {
+  const current = getService(slug, list)
+  return current && list.find((service) => service.order === current.order + 1)
 }
 
 /** Багцуудын хамгийн бага тодорхой үнэ. Бүх багц "Тохиролцоно" бол null. */
@@ -364,23 +365,24 @@ export const servicesPageContent = {
     description:
       "Үйлчилгээ тус бүрийг дангаар нь авч болох ч хамтад нь авснаар мэдлэг, оношилгоо, хэрэгжилт нэг цогц болно.",
     startingFrom: "Эхлэх үнэ",
+    more: "Дэлгэрэнгүй",
   },
 }
 
 /** `/services/[slug]` болон дэд хуудсуудын цэс (tab). `segment` хоосон бол тойм хуудас. */
 const serviceTabs = [
-  { id: "overview", segment: "", label: "Тойм" },
-  { id: "programs", segment: "programs", label: "Хөтөлбөр" },
-  { id: "trainers", segment: "trainers", label: "Сургагч багш" },
-  { id: "pricing", segment: "pricing", label: "Үнийн санал" },
-  { id: "report", segment: "report", label: "Тайлан" },
-  { id: "assessment", segment: "assessment", label: "Үнэлгээний асуулт" },
+  { id: "overview", segment: "" },
+  { id: "programs", segment: "programs" },
+  { id: "trainers", segment: "trainers" },
+  { id: "pricing", segment: "pricing" },
+  { id: "report", segment: "report" },
+  { id: "assessment", segment: "assessment" },
 ] as const
 
 export type ServiceTabId = (typeof serviceTabs)[number]["id"]
 
 /** Тухайн үйлчилгээнд агуулгатай tab-ууд (хөтөлбөр, багшгүй бол тэр tab харагдахгүй). */
-export function getServiceTabs(service: Service) {
+export function getServiceTabs(service: Service, labels: Record<ServiceTabId, string> = serviceDetailContent.tabs) {
   return serviceTabs
     .filter((tab) => {
       if (tab.id === "programs") return (service.programs?.length ?? 0) > 0
@@ -389,16 +391,28 @@ export function getServiceTabs(service: Service) {
     })
     .map((tab) => ({
       ...tab,
+      label: labels[tab.id],
       href: tab.segment ? `/services/${service.slug}/${tab.segment}` : `/services/${service.slug}`,
     }))
 }
 
 /** `/services/[slug]` болон дэд хуудсуудын текст. */
 export const serviceDetailContent = {
+  /** Үйлчилгээний цэс (tab)-ийн нэр */
+  tabs: {
+    overview: "Тойм",
+    programs: "Хөтөлбөр",
+    trainers: "Сургагч багш",
+    pricing: "Үнийн санал",
+    report: "Тайлан",
+    assessment: "Үнэлгээний асуулт",
+  } satisfies Record<ServiceTabId, string>,
   hero: {
     benefitsTitle: "Таны авах үр өгөөж",
     deliverableLabel: "Хүлээлгэн өгөх баримт",
     tabsLabel: "Үйлчилгээний цэс",
+    order: "Захиалах",
+    viewPricing: "Үнийн санал үзэх",
   },
   process: {
     eyebrow: "Дэлгэрэнгүй процесс",

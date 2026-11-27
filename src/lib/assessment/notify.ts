@@ -1,6 +1,6 @@
 import "server-only"
 
-import { company } from "@/content/company"
+import { getSiteContent } from "@/lib/content"
 import type { SubmissionRecord } from "@/lib/assessment/store"
 
 const formatScore = (score: number | null) => (score === null ? "–" : `${score}%`)
@@ -32,6 +32,7 @@ export async function notifyNewSubmission(record: SubmissionRecord): Promise<"se
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) return "skipped"
 
+  const { company } = await getSiteContent()
   const to = (process.env.ASSESSMENT_NOTIFY_TO || company.contact.email)
     .split(",")
     .map((address) => address.trim())

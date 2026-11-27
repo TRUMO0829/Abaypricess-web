@@ -1,12 +1,14 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
-import { getNextService, serviceDetailContent } from "@/content/services"
+import { getNextService } from "@/content/services"
+import { getSiteContent } from "@/lib/content"
 import type { ServiceSlug } from "@/types/content"
 
 /** Дараагийн үйлчилгээ рүү шилжих карт. Сүүлийн үйлчилгээнд (Update) харагдахгүй. */
-export function NextStep({ slug }: { slug: ServiceSlug }) {
-  const next = getNextService(slug)
+export async function NextStep({ slug }: { slug: ServiceSlug }) {
+  const { services, serviceDetailContent } = await getSiteContent()
+  const next = getNextService(slug, services)
   if (!next) return null
   const { eyebrow } = serviceDetailContent.next
   const Icon = next.icon

@@ -26,6 +26,8 @@ export default defineConfig({
     env: { BOOKING_MOCK: "1", ASSESSMENT_MOCK: "1", ZOOM_MEETING_URL: "https://zoom.us/j/1234567890",
       AUTH_MOCK: "1",
       AUTH_SECRET: "e2e-only-auth-secret-0123456789abcdef",
+      ADMIN_MOCK: "1",
+      ADMIN_DEV_PASSWORD: "e2e-admin-pass",
     },
   },
 })

@@ -3,10 +3,10 @@
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
-import { authContent as t } from "@/content/auth"
 import { loginSchema, registerSchema, safeNext, type LoginField, type RegisterField } from "@/lib/auth/schema"
 import { clearSession, sessionConfigured, setSession } from "@/lib/auth/session"
 import { getAccountStore } from "@/lib/auth/store"
+import { getSiteContent } from "@/lib/content"
 
 export interface AuthFormState<F extends string> {
   /** Талбар тус бүрийн алдаа */
@@ -52,6 +52,7 @@ export async function registerAction(
     position: text(formData, "position"),
     phone: text(formData, "phone"),
   }
+  const t = (await getSiteContent()).authContent
   const store = getAccountStore()
   if (!store || !sessionConfigured()) return { message: t.unavailable, values }
 
@@ -76,6 +77,7 @@ export async function registerAction(
 
 export async function loginAction(_prev: AuthFormState<LoginField>, formData: FormData): Promise<AuthFormState<LoginField>> {
   const values = { phone: text(formData, "phone") }
+  const t = (await getSiteContent()).authContent
   const store = getAccountStore()
   if (!store || !sessionConfigured()) return { message: t.unavailable, values }
 

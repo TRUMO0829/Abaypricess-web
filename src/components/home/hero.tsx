@@ -3,9 +3,10 @@ import { ArrowRight } from "lucide-react"
 
 import { HeroCards } from "@/components/home/hero-cards"
 import { Button } from "@/components/ui/button"
-import { hero } from "@/content/home"
+import { getSiteContent } from "@/lib/content"
 
-export function Hero() {
+export async function Hero() {
+  const { hero } = await getSiteContent()
   return (
     <section className="relative overflow-hidden border-b">
       {/* Зөөлөн брэнд gradient + торон дэвсгэр */}

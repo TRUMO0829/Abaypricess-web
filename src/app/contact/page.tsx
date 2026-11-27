@@ -5,11 +5,15 @@ import { ContactInfo } from "@/components/contact/contact-info"
 import { RequestFormSection } from "@/components/contact/request-form-section"
 import { RequestFormSkeleton } from "@/components/contact/request-form-skeleton"
 import { PageHeader } from "@/components/shared/page-header"
-import { contactPage } from "@/content/contact"
+import { getSiteContent } from "@/lib/content"
 
-export const metadata: Metadata = { title: "Холбоо барих", description: contactPage.description }
+export async function generateMetadata(): Promise<Metadata> {
+  const { contactPage } = await getSiteContent()
+  return { title: "Холбоо барих", description: contactPage.description }
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const { contactPage } = await getSiteContent()
   return (
     <>
       <PageHeader

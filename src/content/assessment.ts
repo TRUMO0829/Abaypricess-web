@@ -157,7 +157,8 @@ export const assessmentPage = {
     "Асуултад хариулснаар танай байгууллагын стратеги, процесс, хүний нөөц, санхүү, борлуулалтын өнөөгийн түвшинг тодорхойлно. Хариултыг манай зөвлөхүүд шинжилж, дүгнэлт, зөвлөмжийг тантай хуваалцана.",
   intro: {
     title: "Эхлэхийн өмнө",
-    summary: (sections: number, questions: number) => `${sections} бүлэг · ${questions} асуулт`,
+    /** {sections}, {questions} — тоогоор солигдоно */
+    summary: "{sections} бүлэг · {questions} асуулт",
     points: [
       "Асуулт бүрт байгууллагынхаа одоогийн бодит байдлаар хариулна уу.",
       "Хариулт тань автоматаар энэ хөтөч дээр хадгалагдах тул завсарлаад дараа нь үргэлжлүүлж болно.",
@@ -180,12 +181,15 @@ export const assessmentPage = {
     phone: "Утас",
   },
   sectionsNav: "Үнэлгээний бүлгүүд",
-  progress: (answered: number, total: number) => `${total}-аас ${answered} асуултад хариулсан`,
-  step: (current: number, total: number) => `Алхам ${current} / ${total}`,
+  /** {answered}, {total} */
+  progress: "{total}-аас {answered} асуултад хариулсан",
+  /** {current}, {total} */
+  step: "Алхам {current} / {total}",
   required: "Заавал",
   optional: "(заавал биш)",
   answerRequired: "Энэ асуултад хариулна уу.",
-  missing: (count: number) => `${count} заавал асуултад хариулаагүй байна.`,
+  /** {count} */
+  missing: "{count} заавал асуултад хариулаагүй байна.",
   buttons: {
     start: "Үнэлгээг эхлэх",
     resume: "Үргэлжлүүлэх",

@@ -4,12 +4,12 @@ import { IntroVideo } from "@/components/home/intro-video"
 import { ValuesGrid } from "@/components/home/values-grid"
 import { SectionHeading } from "@/components/shared/section-heading"
 import { Button } from "@/components/ui/button"
-import { company } from "@/content/company"
-import { homeSections } from "@/content/home"
+import { getSiteContent } from "@/lib/content"
 
-const t = homeSections.intro
 
-export function IntroSection() {
+export async function IntroSection() {
+  const { company, homeSections } = await getSiteContent()
+  const t = homeSections.intro
   return (
     <section id="about" className="scroll-mt-16 py-20 md:py-28">
       <div className="container flex flex-col gap-12">

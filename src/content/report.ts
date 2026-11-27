@@ -107,8 +107,8 @@ export const reportTemplates: ReportTemplate[] = [
   },
 ]
 
-export function getReportTemplate(slug: ServiceSlug): ReportTemplate | undefined {
-  return reportTemplates.find((template) => template.service === slug)
+export function getReportTemplate(slug: ServiceSlug, list: ReportTemplate[] = reportTemplates): ReportTemplate | undefined {
+  return list.find((template) => template.service === slug)
 }
 
 /** `/services/[slug]/report` хуудасны текст. */

@@ -3,8 +3,7 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react"
 
 import { Logo } from "@/components/layout/logo"
 import { ScrollToTop } from "@/components/layout/scroll-to-top"
-import { company } from "@/content/company"
-import { footerNav } from "@/content/navigation"
+import { getSiteContent } from "@/lib/content"
 import type { NavItem } from "@/types/content"
 
 const linkClass =
@@ -27,7 +26,8 @@ function FooterColumn({ title, items }: { title: string; items: NavItem[] }) {
   )
 }
 
-export function Footer() {
+export async function Footer() {
+  const { company, footerNav } = await getSiteContent()
   const { contact } = company
   const contactRows = [
     { icon: Phone, content: <a href={`tel:${contact.phone.replace(/\s/g, "")}`} className={linkClass}>{contact.phone}</a> },
@@ -40,7 +40,7 @@ export function Footer() {
     <footer className="border-t bg-muted/40">
       <div className="container grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1.3fr]">
         <div className="flex flex-col gap-4">
-          <Logo />
+          <Logo label={company.legalName} />
           <p className="max-w-xs text-sm text-pretty text-muted-foreground">{company.tagline}</p>
         </div>
         <FooterColumn title={footerNav.services.title} items={footerNav.services.items} />

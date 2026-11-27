@@ -1,7 +1,6 @@
 import Image from "next/image"
 
-import { company } from "@/content/company"
-import { reportPageContent } from "@/content/report"
+import type { reportPageContent } from "@/content/report"
 import { brandLogo } from "@/lib/brand"
 import { cn } from "@/lib/utils"
 import type { ReportTemplate } from "@/types/content"
@@ -14,8 +13,16 @@ const skeletonWidths = ["w-full", "w-11/12", "w-4/5"]
  * агуулгыг давхарласан тул агуулга урт үед цаас сунана, хэзээ ч цааснаас гарахгүй. `light` class нь цаасыг dark горимд ч, хэвлэхэд ч цагаан байлгана
  * (globals.css-ийн `:root, .light` token scope).
  */
-export function ReportPreview({ template }: { template: ReportTemplate }) {
-  const { paper } = reportPageContent
+export function ReportPreview({
+  template,
+  t,
+  company,
+}: {
+  template: ReportTemplate
+  t: typeof reportPageContent
+  company: { nameEn: string; legalName: string }
+}) {
+  const { paper } = t
 
   return (
     <article

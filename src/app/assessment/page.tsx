@@ -2,14 +2,15 @@ import type { Metadata } from "next"
 
 import { AssessmentWizard } from "@/components/assessment/assessment-wizard"
 import { PageHeader } from "@/components/shared/page-header"
-import { assessmentPage } from "@/content/assessment"
+import { getSiteContent } from "@/lib/content"
 
-export const metadata: Metadata = {
-  title: `${assessmentPage.title} ${assessmentPage.highlight}`,
-  description: assessmentPage.description,
+export async function generateMetadata(): Promise<Metadata> {
+  const { assessmentPage } = await getSiteContent()
+  return { title: `${assessmentPage.title} ${assessmentPage.highlight}`, description: assessmentPage.description }
 }
 
-export default function AssessmentPage() {
+export default async function AssessmentPage() {
+  const { assessmentPage, assessment } = await getSiteContent()
   return (
     <>
       <PageHeader
@@ -20,7 +21,7 @@ export default function AssessmentPage() {
       />
       <section className="py-14 md:py-20">
         <div className="container">
-          <AssessmentWizard />
+          <AssessmentWizard assessment={assessment} t={assessmentPage} />
         </div>
       </section>
     </>

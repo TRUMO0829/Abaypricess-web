@@ -3,14 +3,14 @@ import { Check, Info } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { serviceDetailContent } from "@/content/services"
+import type { serviceDetailContent } from "@/content/services"
 import { formatMNT } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import type { Service } from "@/types/content"
 
 /** Загварын Pricing.tsx-ээс port хийсэн үнийн санал. */
-export function ServicePricing({ service }: { service: Service }) {
-  const { popularLabel, note } = serviceDetailContent.pricing
+export function ServicePricing({ service, t }: { service: Service; t: (typeof serviceDetailContent)["pricing"] }) {
+  const { popularLabel, note } = t
 
   return (
     <div className="flex flex-col gap-8">

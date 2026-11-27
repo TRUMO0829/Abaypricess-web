@@ -6,15 +6,17 @@ import { AlertCircle, ArrowLeft, ArrowRight, Check, CheckCircle2, ClipboardList,
 import { QuestionField } from "@/components/assessment/question-field"
 import { RespondentStep, type RespondentErrors } from "@/components/assessment/respondent-step"
 import { Button } from "@/components/ui/button"
-import { assessment, assessmentPage as t } from "@/content/assessment"
+import { assessment as defaultAssessment, type assessmentPage } from "@/content/assessment"
 import { submitAssessment } from "@/lib/assessment/actions"
+import { fill } from "@/lib/format"
 import { respondentSchema, type RespondentFormValues } from "@/lib/assessment/schema"
 import { isValidAnswer, missingRequired } from "@/lib/assessment/scoring"
 import { cn } from "@/lib/utils"
-import type { AnswerValue, Answers } from "@/types/assessment"
+import type { AnswerValue, Answers, Assessment } from "@/types/assessment"
 
-const DRAFT_KEY = `adapt-assessment-draft:${assessment.version}`
-const sections = assessment.sections
+// Бүтэц (асуултын id, тоо, оноо) кодоос; админ зөвхөн текстийг засдаг тул props-ийн текстээр харуулна
+const DRAFT_KEY = `adapt-assessment-draft:${defaultAssessment.version}`
+const sections = defaultAssessment.sections
 const questionsById = new Map(sections.flatMap((section) => section.questions.map((q) => [q.id, q] as const)))
 const totalQuestions = questionsById.size
 /** Асуултын дугаар бүх бүлэгт үргэлжилнэ: бүлэг бүрийн эхний дугаар */
@@ -82,7 +84,9 @@ function subscribeStorage(callback: () => void) {
 
 type Phase = "intro" | "filling" | "done"
 
-export function AssessmentWizard() {
+export function AssessmentWizard({ assessment, t }: { assessment: Assessment; t: typeof assessmentPage }) {
+  // Текст нь админы засвартай хувилбар (бүтэц нь module-level `sections`-тэй ижил)
+  const sections = assessment.sections
   const savedDraft = useSyncExternalStore(subscribeStorage, readDraftRaw, () => null)
   const [phase, setPhase] = useState<Phase>("intro")
   const [step, setStep] = useState(0)
@@ -232,7 +236,7 @@ export function AssessmentWizard() {
           <div>
             <h2 className="text-xl font-bold">{t.intro.title}</h2>
             <p className="text-sm text-muted-foreground">
-              {t.intro.summary(sections.length, totalQuestions)}
+              {fill(t.intro.summary, { sections: sections.length, questions: totalQuestions })}
             </p>
           </div>
         </div>
@@ -349,12 +353,12 @@ export function AssessmentWizard() {
         {/* Явц */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-4 text-sm text-muted-foreground">
-            <span>{t.step(step + 1, stepCount)}</span>
-            <span className="tabular-nums">{t.progress(answeredCount, totalQuestions)}</span>
+            <span>{fill(t.step, { current: step + 1, total: stepCount })}</span>
+            <span className="tabular-nums">{fill(t.progress, { answered: answeredCount, total: totalQuestions })}</span>
           </div>
           <div
             role="progressbar"
-            aria-label={t.progress(answeredCount, totalQuestions)}
+            aria-label={fill(t.progress, { answered: answeredCount, total: totalQuestions })}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={progress}
@@ -373,12 +377,13 @@ export function AssessmentWizard() {
           </p>
         </div>
 
-        {step === 0 && <RespondentStep values={respondent} errors={respondentErrors} onChange={setRespondent} />}
+        {step === 0 && <RespondentStep t={t} values={respondent} errors={respondentErrors} onChange={setRespondent} />}
 
         {section && (
           <div className="flex flex-col gap-4">
             {section.questions.map((question, i) => (
               <QuestionField
+                t={t}
                 key={question.id}
                 question={question}
                 number={sectionOffsets[step - 1] + i + 1}
@@ -390,7 +395,7 @@ export function AssessmentWizard() {
             {section.questions.some((q) => invalidIds.has(q.id)) && (
               <p className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
                 <AlertCircle className="size-4 shrink-0" aria-hidden />
-                {t.missing(section.questions.filter((q) => invalidIds.has(q.id)).length)}
+                {fill(t.missing, { count: section.questions.filter((q) => invalidIds.has(q.id)).length })}
               </p>
             )}
           </div>
@@ -418,7 +423,7 @@ export function AssessmentWizard() {
                     <p className="font-medium">{s.title}</p>
                     <p className={cn("text-sm", missing ? "text-destructive" : "text-muted-foreground")}>
                       {done}/{s.questions.length}
-                      {missing > 0 && ` · ${t.missing(missing)}`}
+                      {missing > 0 && ` · ${fill(t.missing, { count: missing })}`}
                     </p>
                   </div>
                   <Button type="button" variant="ghost" size="sm" onClick={() => goTo(i + 1)}>

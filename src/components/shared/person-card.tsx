@@ -2,7 +2,7 @@ import Image from "next/image"
 import { Mail, Phone } from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { cvLabels as t } from "@/content/team"
+import type { cvLabels } from "@/content/team"
 import { cn } from "@/lib/utils"
 import type { TeamMember } from "@/types/content"
 
@@ -31,7 +31,10 @@ function CvList({ label, items }: { label: string; items: string[] }) {
 }
 
 /** Багийн гишүүн, сургагч багшийн карт: зураг, нэр, албан тушаал, задардаг CV. */
-function PersonCard({ person, id }: { person: TeamMember; id: string }) {
+/** CV-ийн шошго (админы засвар орсон `getSiteContent().cvLabels`) */
+export type CvLabels = typeof cvLabels
+
+function PersonCard({ person, id, t }: { person: TeamMember; id: string; t: CvLabels }) {
   return (
     <li className="flex flex-col overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10">
       <div className="relative flex aspect-video items-center justify-center bg-linear-to-br from-primary/15 to-primary/5 md:aspect-[4/3]">
@@ -40,6 +43,8 @@ function PersonCard({ person, id }: { person: TeamMember; id: string }) {
             src={person.photo}
             alt={person.name}
             fill
+            // Админ гаднын холбоос оруулж болох тул зөвхөн дотоод зургийг optimize хийнэ
+            unoptimized={!person.photo.startsWith("/")}
             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover"
           />
@@ -98,11 +103,11 @@ function PersonCard({ person, id }: { person: TeamMember; id: string }) {
   )
 }
 
-export function PersonGrid({ people, className }: { people: TeamMember[]; className?: string }) {
+export function PersonGrid({ people, labels, className }: { people: TeamMember[]; labels: CvLabels; className?: string }) {
   return (
     <ul className={cn("grid items-start gap-6 md:grid-cols-2 lg:grid-cols-4", className)}>
       {people.map((person, index) => (
-        <PersonCard key={index} person={person} id={`cv-${index}`} />
+        <PersonCard key={person.id ?? index} person={person} id={`cv-${index}`} t={labels} />
       ))}
     </ul>
   )

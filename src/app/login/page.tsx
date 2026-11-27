@@ -2,20 +2,23 @@ import { Suspense } from "react"
 import type { Metadata } from "next"
 
 import { LoginForm } from "@/components/auth/auth-forms"
-import { authContent } from "@/content/auth"
+import { getSiteContent } from "@/lib/content"
 import { safeNext } from "@/lib/auth/schema"
 
-const t = authContent.login
-
-export const metadata: Metadata = { title: t.title, description: t.description, robots: { index: false } }
+export async function generateMetadata(): Promise<Metadata> {
+  const t = (await getSiteContent()).authContent.login
+  return { title: t.title, description: t.description, robots: { index: false } }
+}
 
 /** `?next=` нь request-time өгөгдөл тул Suspense дотор уншина */
 async function LoginContent({ searchParams }: PageProps<"/login">) {
   const { next } = await searchParams
-  return <LoginForm next={safeNext(Array.isArray(next) ? next[0] : next)} />
+  const { authContent } = await getSiteContent()
+  return <LoginForm t={authContent} next={safeNext(Array.isArray(next) ? next[0] : next)} />
 }
 
-export default function LoginPage(props: PageProps<"/login">) {
+export default async function LoginPage(props: PageProps<"/login">) {
+  const t = (await getSiteContent()).authContent.login
   return (
     <section className="py-14 md:py-20">
       <div className="container flex justify-center">

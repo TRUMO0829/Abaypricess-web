@@ -1,5 +1,5 @@
 import { createBooking, type BookingResult } from "@/lib/booking/actions"
-import { buildMailto } from "@/lib/request-summary"
+import { buildMailto, type RequestContent } from "@/lib/request-summary"
 import type { RequestInput } from "@/lib/request-schema"
 
 export type SubmitResult = { status: "sent" } | BookingResult
@@ -10,10 +10,14 @@ export type SubmitResult = { status: "sent" } | BookingResult
  *   Календарь зөвхөн унших горимд (API key) байвал цаг сул эсэхийг шалгаад сонгосон цагтай mailto буцаана.
  * - Цаггүй хүсэлтийг backend холбогдох хүртэл "илгээгдсэн" гэж үзэхгүй — бөглөсөн мэдээллээр mailto буцаана.
  */
-export async function submitRequest(data: RequestInput, options: { honeypot?: string } = {}): Promise<SubmitResult> {
+export async function submitRequest(
+  data: RequestInput,
+  ctx: RequestContent,
+  options: { honeypot?: string } = {}
+): Promise<SubmitResult> {
   if (data.meetingStart) return createBooking(data, options.honeypot)
   try {
-    return { status: "mailto", href: buildMailto(data) }
+    return { status: "mailto", href: buildMailto(ctx, data) }
   } catch {
     return { status: "error", message: "Хүсэлтийг бэлтгэх үед алдаа гарлаа." }
   }

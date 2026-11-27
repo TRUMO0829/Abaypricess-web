@@ -1,7 +1,6 @@
 import { z } from "zod"
 
-import { meetingDurationValues, meetingHosts, meetingModeValues } from "@/content/booking"
-import { getService } from "@/content/services"
+import { meetingDurationValues, meetingModeValues } from "@/content/booking"
 
 /** Багц сонгоогүй гэдгийг илэрхийлэх Select-ийн утга (Radix Select хоосон утга зөвшөөрдөггүй). */
 export const UNDECIDED_PACKAGE = "undecided"
@@ -77,7 +76,8 @@ export const requestSchema = z
       .string()
       .optional()
       .transform((value) => (value && value !== ANY_HOST ? value : undefined))
-      .refine((value) => !value || meetingHosts.some((host) => host.id === value), { error: "Уулзах хүн буруу байна" }),
+      // Багийн гишүүдийг админ засдаг тул жагсаалтаар биш, хэлбэрээр шалгана (server createBooking жагсаалтаар шалгана)
+      .refine((value) => !value || /^[a-z0-9][a-z0-9-]{0,60}$/.test(value), { error: "Уулзах хүн буруу байна" }),
     /** «Очиж уулзах» үед заавал */
     meetingAddress: optionalText(200, "200 тэмдэгтээс хэтрэхгүй"),
   })
@@ -88,9 +88,8 @@ export const requestSchema = z
     if (data.meetingStart && data.meetingMode === "visit" && !data.meetingAddress) {
       ctx.addIssue({ code: "custom", path: ["meetingAddress"], message: "Уулзах хаягаа оруулна уу" })
     }
-    if (!data.packageId) return
-    const service = data.service === "other" ? undefined : getService(data.service)
-    if (!service?.packages.some((pkg) => pkg.id === data.packageId)) {
+    // Багцыг админ засдаг тул хэлбэрээр шалгана; маягт зөвхөн тухайн үйлчилгээний багцыг санал болгоно
+    if (data.packageId && (data.service === "other" || !/^[a-z0-9][a-z0-9-]{0,60}$/.test(data.packageId))) {
       ctx.addIssue({ code: "custom", path: ["packageId"], message: "Сонгосон үйлчилгээнд энэ багц байхгүй" })
     }
   })

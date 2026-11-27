@@ -2,10 +2,11 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { ImageResponse } from "next/og"
 
-import { company } from "@/content/company"
+import { company as defaultCompany } from "@/content/company"
+import { getSiteContent } from "@/lib/content"
 import { brandHex, brandLogo } from "@/lib/brand"
 
-export const alt = `${company.nameEn} — ${company.legalName}`
+export const alt = `${defaultCompany.nameEn} — ${defaultCompany.legalName}`
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
@@ -13,7 +14,8 @@ const logoData = await readFile(join(process.cwd(), "public", brandLogo.src), "b
 const logoSrc = `data:image/png;base64,${logoData}`
 const LOGO_WIDTH = 520
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const { company } = await getSiteContent()
   return new ImageResponse(
     (
       <div

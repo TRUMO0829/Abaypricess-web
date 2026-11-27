@@ -1,11 +1,11 @@
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
-import { heroCards } from "@/content/home"
-import { flowStages } from "@/content/process"
+import { getSiteContent } from "@/lib/content"
 
 /** Hero-гийн баруун талын карт: үндсэн 3 үйлчилгээ, тус бүр нь хуудас руугаа холбогдоно. */
-export function HeroCards() {
+export async function HeroCards() {
+  const { heroCards, flowStages } = await getSiteContent()
   return (
     <div className="relative">
       <div aria-hidden className="absolute -inset-8 -z-10 rounded-full bg-primary/15 blur-3xl dark:bg-primary/10" />

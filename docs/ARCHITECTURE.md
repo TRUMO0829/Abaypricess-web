@@ -14,6 +14,8 @@
 
 > 2026-11-19-ний 5-р засвар: толгой цэснээс «Асуулт хариулт» хасагдсан (tab, footer-т үлдсэн), tab болон footer-ийн нэр «Үнэлгээний асуулт» болсон. Үндсэн 3 үйлчилгээ зөвхөн англи нэртэй (`Service.nameEn` хасагдсан). CV-д «Холбоо барих» (утас, имэйл). Нүүрний «Бидний тухай»-д эрхэм зорилго/алсын харааны оронд YouTube бичлэг. Онлайн уулзалт Zoom (`ZOOM_MEETING_URL`), «Уулзах хүн» сонголт. Заавал биш нэвтрэлт (`docs/AUTH.md`).
 
+> 2026-11-27: Админы хэсэг (`/admin`, `docs/ADMIN.md`). Сайтын бүх текст `getSiteContent()`-оор (кодын default + Supabase `site_content`-ийн засвар) уншигдана. Component-ууд `src/content/`-ийг шууд биш, `getSiteContent()`-оор уншина.
+
 ## Стек
 
 - Next.js 16 (App Router, Turbopack, **Cache Components** + Partial Prefetching идэвхтэй)
@@ -34,6 +36,7 @@
 | `/assessment` | Байгууллагын үнэлгээ («Үнэлгээний асуулт» tab): бүлэг бүрээр асуулт, жинлэсэн оноо → Supabase + имэйл мэдэгдэл (`docs/ASSESSMENT.md`) | coordinator |
 | `/contact` | Хүсэлтийн маягт (`?service=&package=` урьдчилж бөглөнө) + Google Calendar-ын сул цагаас уулзалт захиалах (`docs/BOOKING.md`) | ABAY-3 |
 | `/login`, `/register` | Заавал биш нэвтрэлт: утас + нууц үг. Бүртгэл (нэр, компани, албан тушаал, утас) хүсэлтийн маягтыг автоматаар бөглөнө (`docs/AUTH.md`) | coordinator |
+| `/admin`, `/admin/content/[section]`, `/admin/users` | Админ: сайтын текст засах, харилцагчдын жагсаалт (`docs/ADMIN.md`) | coordinator |
 | `/api/booking/availability` | Эхлэх цаг бүр ба багтах хамгийн урт хугацаа (`{ start, maxMinutes }`), cache-гүй | ABAY-3 |
 
 ## Хавтасны бүтэц
@@ -56,7 +59,7 @@ src/
 
 ## Агуулгын урсгал
 
-- Бүх текст, үнэ, алхам `src/content/*.ts`-д байна; component-ууд түүнийг import хийнэ. Component дотор текст hard-code хийхгүй (товчны богино шошгоос бусад).
+- Бүх текст, үнэ, алхам `src/content/*.ts`-д (анхны утга) байна; component-ууд `await getSiteContent()` (`src/lib/content`)-оор админы засвартай нь уншина. Component дотор текст hard-code хийхгүй (товчны богино шошгоос бусад).
 - Төрлүүд `src/types/content.ts`-д: `Service`, `ProcessStep`, `Program`, `PricePackage`, `FlowStage`, `ReportTemplate`, `Company`, `NavItem`, `Stat`.
 - Үнэ бүгд **түр утга** (`// TODO: бодит үнэ`). `price: null` → "Тохиролцоно". Харуулахдаа `formatMNT()` (`src/lib/format.ts`).
 - Туслах функц: `getService(slug)`, `getNextService(slug)` (`src/content/services.ts`), `flowStages` (`src/content/process.ts`).

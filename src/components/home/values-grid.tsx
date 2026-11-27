@@ -1,13 +1,13 @@
 import { Compass, Flag } from "lucide-react"
 
-import { company } from "@/content/company"
-import { homeSections } from "@/content/home"
+import { getSiteContent } from "@/lib/content"
 import { cn } from "@/lib/utils"
 
-const t = homeSections.intro
 
 /** Эрхэм зорилго, алсын хараа + үнэт зүйлс — нэг ижил картын grid. */
-export function ValuesGrid({ className }: { className?: string }) {
+export async function ValuesGrid({ className }: { className?: string }) {
+  const { company, homeSections } = await getSiteContent()
+  const t = homeSections.intro
   const items = [
     { icon: Flag, title: t.missionLabel, description: company.mission },
     { icon: Compass, title: t.visionLabel, description: company.vision },

@@ -1,6 +1,5 @@
 import Link from "next/link"
 
-import { company } from "@/content/company"
 import { brandLogo } from "@/lib/brand"
 import { cn } from "@/lib/utils"
 
@@ -18,7 +17,8 @@ export function BrandLogo({ className }: { className?: string }) {
   )
 }
 
-export function Logo({ className }: { className?: string }) {
+/** `label` — компанийн нэр (дэлгэц уншигчид) */
+export function Logo({ className, label }: { className?: string; label: string }) {
   return (
     <Link
       href="/"
@@ -28,7 +28,7 @@ export function Logo({ className }: { className?: string }) {
       )}
     >
       <BrandLogo />
-      <span className="sr-only">{company.legalName}, нүүр хуудас</span>
+      <span className="sr-only">{label}, нүүр хуудас</span>
     </Link>
   )
 }

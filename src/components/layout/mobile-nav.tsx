@@ -9,11 +9,20 @@ import { isActivePath, serviceIcon } from "@/components/layout/nav-links"
 import { BrandLogo } from "@/components/layout/logo"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { company } from "@/content/company"
-import { mainNav, requestCta } from "@/content/navigation"
 import { cn } from "@/lib/utils"
+import type { NavItem } from "@/types/content"
 
-export function MobileNav() {
+export function MobileNav({
+  items,
+  cta,
+  legalName,
+  tagline,
+}: {
+  items: NavItem[]
+  cta: NavItem
+  legalName: string
+  tagline: string
+}) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
@@ -29,12 +38,12 @@ export function MobileNav() {
         <SheetHeader className="border-b">
           <SheetTitle className="flex items-center gap-2 font-bold">
             <BrandLogo className="h-8" />
-            <span className="sr-only">{company.legalName}</span>
+            <span className="sr-only">{legalName}</span>
           </SheetTitle>
-          <SheetDescription>{company.tagline}</SheetDescription>
+          <SheetDescription>{tagline}</SheetDescription>
         </SheetHeader>
         <nav aria-label="Гар утасны цэс" className="flex flex-col gap-1 p-4">
-          {mainNav.map((item) => {
+          {items.map((item) => {
             const active = isActivePath(pathname, item.href)
             return (
               <div key={item.href}>
@@ -82,8 +91,8 @@ export function MobileNav() {
         </nav>
         <div className="mt-auto border-t p-4">
           <Button asChild size="lg" className="w-full">
-            <Link href={requestCta.href} onClick={close}>
-              {requestCta.label}
+            <Link href={cta.href} onClick={close}>
+              {cta.label}
             </Link>
           </Button>
         </div>

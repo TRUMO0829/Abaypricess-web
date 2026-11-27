@@ -2,15 +2,14 @@
 
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { assessmentPage } from "@/content/assessment"
+import type { assessmentPage } from "@/content/assessment"
 import { employeeOptions, type RespondentFormValues } from "@/lib/assessment/schema"
 import { cn } from "@/lib/utils"
-
-const t = assessmentPage.respondent
 
 export type RespondentErrors = Partial<Record<keyof RespondentFormValues, string>>
 
 interface RespondentStepProps {
+  t: typeof assessmentPage
   values: RespondentFormValues
   errors: RespondentErrors
   onChange: (values: RespondentFormValues) => void
@@ -18,23 +17,24 @@ interface RespondentStepProps {
 
 type TextField = Exclude<keyof RespondentFormValues, "employees">
 
-const fields: {
-  name: TextField
-  label: string
-  required: boolean
-  type?: string
-  autoComplete?: string
-  placeholder?: string
-}[] = [
-  { name: "organization", label: t.organization, required: true, autoComplete: "organization" },
-  { name: "industry", label: t.industry, required: false, placeholder: t.industryPlaceholder },
-  { name: "name", label: t.name, required: true, autoComplete: "given-name", placeholder: t.namePlaceholder },
-  { name: "position", label: t.position, required: true, autoComplete: "organization-title", placeholder: t.positionPlaceholder },
-  { name: "email", label: t.email, required: true, type: "email", autoComplete: "email", placeholder: "name@company.mn" },
-  { name: "phone", label: t.phone, required: true, type: "tel", autoComplete: "tel", placeholder: "9911 2233" },
-]
-
-export function RespondentStep({ values, errors, onChange }: RespondentStepProps) {
+export function RespondentStep({ t: page, values, errors, onChange }: RespondentStepProps) {
+  const assessmentPage = page
+  const t = page.respondent
+  const fields: {
+    name: TextField
+    label: string
+    required: boolean
+    type?: string
+    autoComplete?: string
+    placeholder?: string
+  }[] = [
+    { name: "organization", label: t.organization, required: true, autoComplete: "organization" },
+    { name: "industry", label: t.industry, required: false, placeholder: t.industryPlaceholder },
+    { name: "name", label: t.name, required: true, autoComplete: "given-name", placeholder: t.namePlaceholder },
+    { name: "position", label: t.position, required: true, autoComplete: "organization-title", placeholder: t.positionPlaceholder },
+    { name: "email", label: t.email, required: true, type: "email", autoComplete: "email", placeholder: "name@company.mn" },
+    { name: "phone", label: t.phone, required: true, type: "tel", autoComplete: "tel", placeholder: "9911 2233" },
+  ]
   const errorId = (name: string) => (errors[name as keyof RespondentErrors] ? `${name}-error` : undefined)
 
   return (

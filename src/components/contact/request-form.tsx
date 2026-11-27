@@ -12,11 +12,8 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { bookingContent } from "@/content/booking"
-import { company } from "@/content/company"
-import { requestFormContent, serviceOptions } from "@/content/contact"
-import { getService } from "@/content/services"
 import { formatMeeting } from "@/lib/booking/format"
+import { fill } from "@/lib/format"
 import { openMailClient, submitRequest, type SubmitResult } from "@/lib/request"
 import {
   requestSchema,
@@ -26,17 +23,16 @@ import {
   type RequestFormValues,
   type RequestInput,
 } from "@/lib/request-schema"
+import type { RequestContent } from "@/lib/request-summary"
 
 type ServiceValue = (typeof requestServiceValues)[number]
-
-const text = requestFormContent
 
 function parseService(value: string | null): ServiceValue | undefined {
   return requestServiceValues.find((option) => option === value)
 }
 
-function packagesFor(service: ServiceValue | undefined) {
-  return service && service !== "other" ? (getService(service)?.packages ?? []) : []
+function packagesFor(services: RequestContent["services"], service: ServiceValue | undefined) {
+  return service && service !== "other" ? (services.find((s) => s.slug === service)?.packages ?? []) : []
 }
 
 /** Нэвтэрсэн хэрэглэгчийн бүртгэлийн мэдээлэл — маягтыг урьдчилж бөглөнө (засах боломжтой). */
@@ -48,11 +44,11 @@ export interface RequestPrefill {
 }
 
 /** `?service=&package=`-ээс эхний утгыг уншина; буруу утгыг үл тооно. */
-function useInitialValues(prefill?: RequestPrefill): DefaultValues<RequestFormValues> {
+function useInitialValues(services: RequestContent["services"], prefill?: RequestPrefill): DefaultValues<RequestFormValues> {
   const params = useSearchParams()
   const service = parseService(params.get("service"))
   const pkg = params.get("package")
-  const packageId = pkg && packagesFor(service).some((p) => p.id === pkg) ? pkg : ""
+  const packageId = pkg && packagesFor(services, service).some((p) => p.id === pkg) ? pkg : ""
   return {
     name: prefill?.name ?? "",
     organization: prefill?.organization ?? "",
@@ -70,8 +66,8 @@ function useInitialValues(prefill?: RequestPrefill): DefaultValues<RequestFormVa
   }
 }
 
-function ContactFallback() {
-  const { phone, email } = company.contact
+function ContactFallback({ contact }: { contact: RequestContent["contact"] }) {
+  const { phone, email } = contact
   return (
     <ul className="mt-3 flex flex-col gap-2 text-sm sm:flex-row sm:gap-6">
       <li>
@@ -90,8 +86,9 @@ function ContactFallback() {
   )
 }
 
-export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
-  const defaultValues = useInitialValues(prefill)
+export function RequestForm({ prefill, content }: { prefill?: RequestPrefill; content: RequestContent }) {
+  const { text, booking: bookingContent, contact, serviceOptions, services } = content
+  const defaultValues = useInitialValues(services, prefill)
   const [result, setResult] = useState<SubmitResult | null>(null)
   const [showSummary, setShowSummary] = useState(false)
   const [pickerRefresh, setPickerRefresh] = useState(0)
@@ -113,7 +110,7 @@ export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
   } = form
 
   const service = useWatch({ control, name: "service" })
-  const packages = packagesFor(service)
+  const packages = packagesFor(services, service)
   const meetingStart = useWatch({ control, name: "meetingStart" }) ?? ""
   const meetingDuration = useWatch({ control, name: "meetingDuration" }) ?? "60"
   const meetingMode = useWatch({ control, name: "meetingMode" }) ?? "online"
@@ -130,7 +127,7 @@ export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
     setResult(null)
     const form = event?.target instanceof HTMLFormElement ? event.target : undefined
     const honeypot = form ? String(new FormData(form).get("website") ?? "") : undefined
-    const next = await submitRequest(values, { honeypot })
+    const next = await submitRequest(values, content, { honeypot })
     setResult(next)
     if (next.status === "mailto") openMailClient(next.href)
     if (next.status === "slot-taken") {
@@ -203,7 +200,7 @@ export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
         ) : (
           <p className="flex items-center gap-2 text-sm">
             <MapPin className="size-4 shrink-0 text-primary" aria-hidden />
-            {result.mode === "visit" ? `${booked.visit} ${result.address ?? ""}` : `${booked.office} ${company.contact.address}`}
+            {result.mode === "visit" ? `${booked.visit} ${result.address ?? ""}` : `${booked.office} ${contact.address}`}
           </p>
         )}
         <Button variant="outline" onClick={startOver}>
@@ -241,7 +238,7 @@ export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
               <a href={result.href}>{text.status.mailto.reopen}</a>
             </Button>
             <p className="mt-4 text-muted-foreground">{text.status.mailto.fallback}</p>
-            <ContactFallback />
+            <ContactFallback contact={contact} />
           </div>
         )}
         {result?.status === "error" && (
@@ -257,7 +254,7 @@ export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
             <p className="mt-1.5 text-muted-foreground">
               {result.message} {text.status.error.description}
             </p>
-            <ContactFallback />
+            <ContactFallback contact={contact} />
           </div>
         )}
         {result?.status === "slot-taken" && (
@@ -276,7 +273,7 @@ export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
         {!result && showSummary && Object.keys(errors).length > 0 && (
           <p className="flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
             <AlertCircle className="size-4 shrink-0" aria-hidden />
-            {text.invalidSummary(Object.keys(errors).length)}
+            {fill(text.invalidSummary, { count: Object.keys(errors).length })}
           </p>
         )}
       </div>
@@ -478,6 +475,8 @@ export function RequestForm({ prefill }: { prefill?: RequestPrefill }) {
 
         <div className="lg:sticky lg:top-24 lg:self-start">
           <MeetingPicker
+            t={bookingContent}
+            hosts={content.hosts}
             start={meetingStart}
             duration={meetingDuration}
             mode={meetingMode}

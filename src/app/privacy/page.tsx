@@ -1,12 +1,15 @@
 import type { Metadata } from "next"
 
 import { PageHeader } from "@/components/shared/page-header"
-import { company } from "@/content/company"
-import { privacyPolicy as t } from "@/content/privacy"
+import { getSiteContent } from "@/lib/content"
 
-export const metadata: Metadata = { title: t.title, description: t.intro }
+export async function generateMetadata(): Promise<Metadata> {
+  const { privacyPolicy: t } = await getSiteContent()
+  return { title: t.title, description: t.intro }
+}
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const { company, privacyPolicy: t } = await getSiteContent()
   return (
     <>
       <PageHeader title={t.title} breadcrumbs={[{ label: t.title }]} />
@@ -17,7 +20,7 @@ export default function PrivacyPage() {
           </p>
           <p className="text-pretty text-muted-foreground">{t.intro}</p>
           {t.sections.map((section) => (
-            <section key={section.title} className="flex flex-col gap-3">
+            <section key={`${section.title}-${section.items.length}`} className="flex flex-col gap-3">
               <h2 className="text-xl font-semibold">{section.title}</h2>
               <ul className="flex list-disc flex-col gap-2 ps-5 text-pretty text-muted-foreground marker:text-primary">
                 {section.items.map((item) => (

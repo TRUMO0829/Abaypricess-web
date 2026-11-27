@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import { AlertCircle } from "lucide-react"
 
 import { Textarea } from "@/components/ui/textarea"
-import { assessmentPage as t } from "@/content/assessment"
+import type { assessmentPage } from "@/content/assessment"
 import { isRequired, TEXT_ANSWER_MAX } from "@/lib/assessment/scoring"
 import { cn } from "@/lib/utils"
 import type { AnswerValue, AssessmentQuestion } from "@/types/assessment"
@@ -41,6 +41,7 @@ function Chip({ name, checked, onSelect, className, children }: ChipProps) {
 }
 
 interface QuestionFieldProps {
+  t: typeof assessmentPage
   question: AssessmentQuestion
   number: number
   value: AnswerValue | undefined
@@ -48,7 +49,7 @@ interface QuestionFieldProps {
   invalid?: boolean
 }
 
-export function QuestionField({ question, number, value, onChange, invalid }: QuestionFieldProps) {
+export function QuestionField({ t, question, number, value, onChange, invalid }: QuestionFieldProps) {
   const name = `q-${question.id}`
   const required = isRequired(question)
   const hintId = question.hint ? `${name}-hint` : undefined

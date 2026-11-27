@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { BookOpen, FlaskConical, RefreshCw } from "lucide-react"
 
 import {
   NavigationMenu,
@@ -12,28 +13,33 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { mainNav, servicesMenuAll } from "@/content/navigation"
-import { services } from "@/content/services"
 import { cn } from "@/lib/utils"
+import type { NavItem } from "@/types/content"
 
 /** `href` идэвхтэй эсэх: "/" зөвхөн яг таарвал, бусад нь угтвараар. */
 export function isActivePath(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`)
 }
 
+const serviceIcons: Record<string, typeof BookOpen> = {
+  "/services/training": BookOpen,
+  "/services/laboratory": FlaskConical,
+  "/services/update": RefreshCw,
+}
+
 export function serviceIcon(href: string) {
-  return services.find((service) => `/services/${service.slug}` === href)?.icon
+  return serviceIcons[href]
 }
 
 const activeClass = "text-primary bg-accent/60 dark:bg-accent/40"
 
-export function NavLinks() {
+export function NavLinks({ items, allLabel }: { items: NavItem[]; allLabel: string }) {
   const pathname = usePathname()
 
   return (
     <NavigationMenu viewport={false} aria-label="Үндсэн цэс">
       <NavigationMenuList className="gap-0.5">
-        {mainNav.map((item) => {
+        {items.map((item) => {
           const active = isActivePath(pathname, item.href)
 
           if (item.children) {
@@ -66,7 +72,7 @@ export function NavLinks() {
                     <li className="mt-1 border-t pt-1">
                       <NavigationMenuLink asChild>
                         <Link href={item.href} className="justify-between p-3 text-sm font-medium text-primary">
-                          {servicesMenuAll}
+                          {allLabel}
                           <span aria-hidden>→</span>
                         </Link>
                       </NavigationMenuLink>

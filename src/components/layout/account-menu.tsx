@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { authContent as t } from "@/content/auth"
 import { logoutAction } from "@/lib/auth/actions"
 
 export interface AccountSummary {
@@ -23,7 +22,14 @@ export interface AccountSummary {
 }
 
 /** Толгойн баруун талын нэвтрэх товч / нэвтэрсэн хэрэглэгчийн цэс. */
-export function AccountMenu({ account }: { account: AccountSummary | null }) {
+export interface AccountMenuLabels {
+  login: string
+  logout: string
+  account: string
+}
+
+export function AccountMenu({ account, labels }: { account: AccountSummary | null; labels: AccountMenuLabels }) {
+  const t = { menu: labels }
   const pathname = usePathname()
   const loginHref = pathname && pathname !== "/" && pathname !== "/login" ? `/login?next=${encodeURIComponent(pathname)}` : "/login"
 

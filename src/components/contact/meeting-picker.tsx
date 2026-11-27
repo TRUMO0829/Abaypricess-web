@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
-  bookingContent as t,
-  meetingHosts,
+  type bookingContent,
   meetingDurationValues,
   meetingModeValues,
   type MeetingDuration,
@@ -71,6 +70,10 @@ function Choice({ name, value, checked, onSelect, label, muted, disabled, classN
 }
 
 interface MeetingPickerProps {
+  /** Админы засвар орсон текст */
+  t: typeof bookingContent
+  /** «Уулзах хүн» сонголт */
+  hosts: { id: string; name: string; role: string }[]
   start: string
   duration: MeetingDuration
   mode: MeetingMode
@@ -91,6 +94,8 @@ interface MeetingPickerProps {
 }
 
 export function MeetingPicker({
+  t,
+  hosts: meetingHosts,
   start,
   duration,
   mode,

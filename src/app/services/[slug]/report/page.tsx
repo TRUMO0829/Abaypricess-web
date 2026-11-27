@@ -4,19 +4,19 @@ import { PrintButton } from "@/components/report/print-button"
 import { ReportPreview } from "@/components/report/report-preview"
 import { ServiceRoute, serviceMetadata } from "@/components/services/service-route"
 import { SectionHeading } from "@/components/shared/section-heading"
-import { getReportTemplate, reportPageContent as t } from "@/content/report"
-import { serviceDetailContent } from "@/content/services"
+import { getReportTemplate } from "@/content/report"
 
 export function generateMetadata({ params }: PageProps<"/services/[slug]/report">) {
-  return serviceMetadata(params, "Тайлан")
+  return serviceMetadata(params, "report")
 }
 
 export default function ReportPage({ params }: PageProps<"/services/[slug]/report">) {
-  const heading = serviceDetailContent.report
   return (
     <ServiceRoute params={params}>
-      {(service) => {
-        const template = getReportTemplate(service.slug)
+      {(service, content) => {
+        const heading = content.serviceDetailContent.report
+        const t = content.reportPageContent
+        const template = getReportTemplate(service.slug, content.reportTemplates)
         if (!template) notFound()
         return (
           <section className="py-16 md:py-20 print:p-0">
@@ -34,7 +34,7 @@ export default function ReportPage({ params }: PageProps<"/services/[slug]/repor
                 </div>
               </div>
               <div className="rounded-xl bg-muted/50 p-3 sm:p-6 md:p-10 print:bg-transparent print:p-0">
-                <ReportPreview template={template} />
+                <ReportPreview template={template} t={t} company={content.company} />
               </div>
             </div>
           </section>

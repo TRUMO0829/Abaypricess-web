@@ -7,11 +7,13 @@ import { AlertCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Field, FieldError, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { authContent as t } from "@/content/auth"
+import type { authContent } from "@/content/auth"
 import { loginAction, registerAction, type AuthFormState } from "@/lib/auth/actions"
 import type { LoginField, RegisterField } from "@/lib/auth/schema"
 
 type FieldName = RegisterField | LoginField
+/** Админы засвар орсон текст (`getSiteContent().authContent`) */
+export type AuthTexts = typeof authContent
 
 const inputProps: Partial<Record<FieldName, React.ComponentProps<"input">>> = {
   name: { autoComplete: "given-name" },
@@ -23,11 +25,13 @@ const inputProps: Partial<Record<FieldName, React.ComponentProps<"input">>> = {
 }
 
 function AuthField({
+  t,
   name,
   state,
   autoComplete,
   autoFocus,
 }: {
+  t: AuthTexts
   name: FieldName
   state: AuthFormState<FieldName>
   autoComplete?: string
@@ -79,14 +83,14 @@ function SubmitButton({ pending, label, pendingLabel }: { pending: boolean; labe
 
 const withNext = (href: string, next: string) => (next === "/" ? href : `${href}?next=${encodeURIComponent(next)}`)
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, t }: { next: string; t: AuthTexts }) {
   const [state, action, pending] = useActionState(loginAction, {} as AuthFormState<LoginField>)
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="next" value={next} />
       <FormMessage message={state.message} />
-      <AuthField name="phone" state={state} autoFocus />
-      <AuthField name="password" state={state} autoComplete="current-password" />
+      <AuthField t={t} name="phone" state={state} autoFocus />
+      <AuthField t={t} name="password" state={state} autoComplete="current-password" />
       <SubmitButton pending={pending} label={t.login.submit} pendingLabel={t.login.submitting} />
       <p className="text-center text-sm text-muted-foreground">
         {t.login.noAccount}{" "}
@@ -99,19 +103,19 @@ export function LoginForm({ next }: { next: string }) {
   )
 }
 
-export function RegisterForm({ next }: { next: string }) {
+export function RegisterForm({ next, t }: { next: string; t: AuthTexts }) {
   const [state, action, pending] = useActionState(registerAction, {} as AuthFormState<RegisterField>)
   return (
     <form action={action} noValidate className="flex flex-col gap-5">
       <input type="hidden" name="next" value={next} />
       <FormMessage message={state.message} />
       <div className="grid gap-5 sm:grid-cols-2">
-        <AuthField name="name" state={state} autoFocus />
-        <AuthField name="phone" state={state} />
-        <AuthField name="company" state={state} />
-        <AuthField name="position" state={state} />
-        <AuthField name="password" state={state} autoComplete="new-password" />
-        <AuthField name="confirmPassword" state={state} />
+        <AuthField t={t} name="name" state={state} autoFocus />
+        <AuthField t={t} name="phone" state={state} />
+        <AuthField t={t} name="company" state={state} />
+        <AuthField t={t} name="position" state={state} />
+        <AuthField t={t} name="password" state={state} autoComplete="new-password" />
+        <AuthField t={t} name="confirmPassword" state={state} />
       </div>
       <SubmitButton pending={pending} label={t.register.submit} pendingLabel={t.register.submitting} />
       <p className="text-center text-sm text-muted-foreground">

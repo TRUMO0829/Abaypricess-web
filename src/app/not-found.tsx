@@ -3,9 +3,10 @@ import { ArrowLeft } from "lucide-react"
 
 import { BrandLogo } from "@/components/layout/logo"
 import { Button } from "@/components/ui/button"
-import { notFoundContent as t } from "@/content/navigation"
+import { getSiteContent } from "@/lib/content"
 
-export default function NotFound() {
+export default async function NotFound() {
+  const { notFoundContent: t } = await getSiteContent()
   return (
     <section className="container flex min-h-[60vh] flex-col items-center justify-center gap-6 py-20 text-center">
       <BrandLogo className="h-14 opacity-90" />
