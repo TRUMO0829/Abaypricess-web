@@ -36,9 +36,14 @@ export interface AdminStore {
   readMedia(id: string): Promise<{ mime: string; data: Buffer } | null>
 }
 
-export const MEDIA_MIMES = ["image/jpeg", "image/png", "image/webp"] as const
-export type MediaMime = (typeof MEDIA_MIMES)[number]
-export const MEDIA_MAX_BYTES = 2_000_000
+export type MediaMime = "image/jpeg" | "image/png" | "image/webp" | "application/pdf"
+/** Зураг 2MB, PDF 4MB (Vercel-ийн 4.5MB хүсэлтийн хязгаарт багтана) */
+export const MEDIA_MAX_BYTES: Record<MediaMime, number> = {
+  "image/jpeg": 2_000_000,
+  "image/png": 2_000_000,
+  "image/webp": 2_000_000,
+  "application/pdf": 4_000_000,
+}
 const MEDIA_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export const isMediaId = (id: string) => MEDIA_ID.test(id)
 

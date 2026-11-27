@@ -91,8 +91,19 @@ export interface Service {
   /** Сургагч багш нар (Сургагч багш tab) */
   trainers?: TeamMember[]
   packages: PricePackage[]
+  /** Админаас оруулсан PDF: гэрээний материал (Тойм), хөтөлбөрийн (Хөтөлбөр), тайлангийн (Тайлан) */
+  contractFiles: ServiceDocument[]
+  programFiles: ServiceDocument[]
+  reportFiles: ServiceDocument[]
   /** Диаграмм дээрх баримтын нэр, ж: "Business Training үйлчилгээ, үнийн санал" */
   deliverable: string
+}
+
+/** Татаж авах PDF материал. `file` нь `/media/<id>` эсвэл https холбоос. */
+export interface ServiceDocument {
+  id: string
+  title: string
+  file: string
 }
 
 export interface TeamMember {

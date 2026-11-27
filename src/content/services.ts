@@ -164,6 +164,9 @@ export const services: Service[] = [
         email: "name@adaptmanagement.mn",
       },
     ],
+    contractFiles: [],
+    programFiles: [],
+    reportFiles: [],
     deliverable: "Business Training үйлчилгээ, үнийн санал",
   },
   {
@@ -246,6 +249,9 @@ export const services: Service[] = [
         cta: "Үнийн санал авах",
       },
     ],
+    contractFiles: [],
+    programFiles: [],
+    reportFiles: [],
     deliverable: "Үйлчилгээний танилцуулга, үнийн санал",
   },
   {
@@ -328,6 +334,9 @@ export const services: Service[] = [
         cta: "Үнийн санал авах",
       },
     ],
+    contractFiles: [],
+    programFiles: [],
+    reportFiles: [],
     deliverable: "Үйлчилгээний танилцуулга",
   },
 ]
@@ -385,7 +394,7 @@ export type ServiceTabId = (typeof serviceTabs)[number]["id"]
 export function getServiceTabs(service: Service, labels: Record<ServiceTabId, string> = serviceDetailContent.tabs) {
   return serviceTabs
     .filter((tab) => {
-      if (tab.id === "programs") return (service.programs?.length ?? 0) > 0
+      if (tab.id === "programs") return (service.programs?.length ?? 0) > 0 || service.programFiles.length > 0
       if (tab.id === "trainers") return (service.trainers?.length ?? 0) > 0
       return true
     })
@@ -454,5 +463,12 @@ export const serviceDetailContent = {
   },
   next: {
     eyebrow: "Дараагийн алхам",
+  },
+  /** Админаас оруулсан PDF материалын гарчиг */
+  documents: {
+    contract: "Гэрээний материал",
+    programs: "Хөтөлбөрийн материал",
+    report: "Тайлангийн материал",
+    open: "PDF нээх",
   },
 }

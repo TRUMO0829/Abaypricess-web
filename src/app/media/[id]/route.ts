@@ -10,6 +10,7 @@ export async function GET(_request: Request, { params }: RouteContext<"/media/[i
       "content-type": media.mime,
       "cache-control": "public, max-age=31536000, immutable",
       "x-content-type-options": "nosniff",
+      ...(media.mime === "application/pdf" && { "content-disposition": "inline" }),
     },
   })
 }

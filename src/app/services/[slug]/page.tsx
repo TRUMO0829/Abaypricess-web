@@ -2,6 +2,7 @@ import { CheckCircle2, FileText } from "lucide-react"
 
 import { NextStep } from "@/components/services/next-step"
 import { ProcessStepper } from "@/components/services/process-stepper"
+import { ServiceDocuments } from "@/components/services/service-documents"
 import { ServiceRoute, ServiceSection, serviceMetadata } from "@/components/services/service-route"
 import { getNextService } from "@/content/services"
 import type { SiteContent } from "@/lib/content"
@@ -12,7 +13,7 @@ export function generateMetadata({ params }: PageProps<"/services/[slug]">) {
 }
 
 function Overview({ service, content }: { service: Service; content: SiteContent }) {
-  const { hero, process } = content.serviceDetailContent
+  const { hero, process, documents } = content.serviceDetailContent
 
   return (
     <>
@@ -38,6 +39,11 @@ function Overview({ service, content }: { service: Service; content: SiteContent
             </div>
           </aside>
         </div>
+        {service.contractFiles.length > 0 && (
+          <div className="container mt-12">
+            <ServiceDocuments title={documents.contract} openLabel={documents.open} documents={service.contractFiles} />
+          </div>
+        )}
       </section>
 
       <div className="border-t">

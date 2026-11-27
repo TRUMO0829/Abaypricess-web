@@ -105,23 +105,33 @@ function sniffImage(bytes: Buffer): MediaMime | null {
   if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg"
   if (bytes.length > 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "image/png"
   if (bytes.length > 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP") return "image/webp"
+  if (bytes.length > 5 && bytes.toString("ascii", 0, 5) === "%PDF-") return "application/pdf"
   return null
 }
 
-/** Багийн гишүүн, сургагч багшийн зураг. Буцаасан `url`-ийг `photo` талбарт хадгална. */
+/**
+ * Зураг (`kind: "image"`, хүний карт) эсвэл PDF (`kind: "pdf"`, үйлчилгээний материал).
+ * Буцаасан `url`-ийг `photo` / `file` талбарт хадгална.
+ */
 export async function uploadMediaAction(formData: FormData): Promise<UploadMediaResult> {
   const { store, token } = await requireAdmin()
+  const pdf = formData.get("kind") === "pdf"
   const file = formData.get("file")
-  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Зураг сонгоно уу." }
-  if (file.size > MEDIA_MAX_BYTES) return { ok: false, message: "Зураг 2MB-аас бага байх ёстой." }
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: pdf ? "PDF файл сонгоно уу." : "Зураг сонгоно уу." }
   const bytes = Buffer.from(await file.arrayBuffer())
   const mime = sniffImage(bytes)
-  if (!mime) return { ok: false, message: "Зөвхөн JPG, PNG, WebP зураг оруулна." }
+  if (pdf ? mime !== "application/pdf" : !mime || mime === "application/pdf") {
+    return { ok: false, message: pdf ? "Зөвхөн PDF файл оруулна." : "Зөвхөн JPG, PNG, WebP зураг оруулна." }
+  }
+  if (!mime) return { ok: false, message: "Файлын төрөл танигдсангүй." }
+  if (bytes.length > MEDIA_MAX_BYTES[mime]) {
+    return { ok: false, message: pdf ? "PDF файл 4MB-аас бага байх ёстой." : "Зураг 2MB-аас бага байх ёстой." }
+  }
   try {
     const id = await store.uploadMedia(token, mime, bytes)
     return { ok: true, url: `/media/${id}` }
   } catch (error) {
     console.error("[admin] upload", error)
-    return { ok: false, message: "Зураг хадгалж чадсангүй. Supabase-д зургийн migration ажилласан эсэхийг шалгана уу." }
+    return { ok: false, message: "Файл хадгалж чадсангүй. Supabase-д файлын migration ажилласан эсэхийг шалгана уу." }
   }
 }

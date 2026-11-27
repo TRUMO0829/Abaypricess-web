@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { ArrowDown, ArrowUp, Check, ChevronRight, Loader2, Plus, RotateCcw, Save, Trash2 } from "lucide-react"
 
+import { DocumentInput } from "@/components/admin/document-input"
 import { PhotoInput } from "@/components/admin/photo-input"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -107,7 +108,7 @@ function ArrayNode({ value, path, defaults, onChange, depth }: NodeProps & { val
   const defaultItems = Array.isArray(defaults) ? defaults : []
   const sample = defaultItems.length ? defaultItems : value
   const growable = isGrowable(path, sample)
-  const shape = itemShape(sample) as Plain
+  const shape = itemShape(sample, path) as Plain
 
   const move = (from: number, to: number) => {
     const next = [...value]
@@ -201,6 +202,7 @@ function Node({ value, path, defaults, onChange, depth }: NodeProps) {
       />
     )
   }
+  if (key === "file" && typeof value === "string") return <DocumentInput id={id} value={value} onChange={(url) => onChange(path, url)} />
   if (key === "photo" && typeof value === "string") return <PhotoInput id={id} value={value} onChange={(url) => onChange(path, url)} />
   if (typeof value === "string") return <TextInput id={id} value={value} onChange={(text) => onChange(path, text)} />
   if (typeof value === "boolean") {

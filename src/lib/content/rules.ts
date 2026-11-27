@@ -37,7 +37,18 @@ const GROWABLE = new Set([
   "privacyPolicy.sections",
   "contactInfoContent.steps",
   "reportTemplates.*.sections",
+  "services.*.contractFiles",
+  "services.*.programFiles",
+  "services.*.reportFiles",
 ])
+
+/** Анхны утга нь хоосон объектын жагсаалтын шинэ мөрийн загвар */
+const documentShape = { id: "", title: "", file: "" }
+const EMPTY_LIST_SHAPES: Record<string, Record<string, string>> = {
+  "services.*.contractFiles": documentShape,
+  "services.*.programFiles": documentShape,
+  "services.*.reportFiles": documentShape,
+}
 
 /** Тоо нь тогтмол байх ёстой текстийн жагсаалт */
 const FIXED_STRING_ARRAYS = new Set(["bookingContent.weekdays", "bookingContent.weekdaysShort"])
@@ -92,7 +103,9 @@ function blank(value: unknown, key?: string): unknown {
  * Шинэ мөрийн хоосон загвар: жагсаалтын бүх мөрийн түлхүүрийн нэгдэл (ж: зарим багцад л `popular` байдаг).
  * Текстийн жагсаалт бол "".
  */
-export function itemShape(items: unknown[]): unknown {
+export function itemShape(items: unknown[], path?: Path): unknown {
+  const emptyShape = path && items.length === 0 ? EMPTY_LIST_SHAPES[pattern(path)] : undefined
+  if (emptyShape) return { ...emptyShape }
   if (items.every((item) => typeof item === "string")) return ""
   const shape: Record<string, unknown> = {}
   for (const item of items) {

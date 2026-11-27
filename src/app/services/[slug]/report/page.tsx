@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 
 import { PrintButton } from "@/components/report/print-button"
 import { ReportPreview } from "@/components/report/report-preview"
+import { ServiceDocuments } from "@/components/services/service-documents"
 import { ServiceRoute, serviceMetadata } from "@/components/services/service-route"
 import { SectionHeading } from "@/components/shared/section-heading"
 import { getReportTemplate } from "@/content/report"
@@ -15,6 +16,7 @@ export default function ReportPage({ params }: PageProps<"/services/[slug]/repor
     <ServiceRoute params={params}>
       {(service, content) => {
         const heading = content.serviceDetailContent.report
+        const documents = content.serviceDetailContent.documents
         const t = content.reportPageContent
         const template = getReportTemplate(service.slug, content.reportTemplates)
         if (!template) notFound()
@@ -33,6 +35,7 @@ export default function ReportPage({ params }: PageProps<"/services/[slug]/repor
                   <p className="text-xs text-muted-foreground">{t.printHint}</p>
                 </div>
               </div>
+              <ServiceDocuments title={documents.report} openLabel={documents.open} documents={service.reportFiles} />
               <div className="rounded-xl bg-muted/50 p-3 sm:p-6 md:p-10 print:bg-transparent print:p-0">
                 <ReportPreview template={template} t={t} company={content.company} />
               </div>

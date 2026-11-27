@@ -103,6 +103,45 @@ test.describe("админ", () => {
     await expect(page.getByRole("status")).toContainText("Анхны текст")
   })
 
+  test("тайлан, хөтөлбөр, гэрээний PDF материал оруулахад үйлчилгээний хуудсанд харагдана", async ({ page }) => {
+    await login(page)
+    await page.goto("/admin/content/services")
+    await page.locator("summary", { hasText: "Business Training Service" }).first().click()
+    const lists = [
+      { legend: "Гэрээний материал", title: "Гэрээний загвар", path: "/services/training" },
+      { legend: "Хөтөлбөрийн материал", title: "Хөтөлбөрийн дэлгэрэнгүй", path: "/services/training/programs" },
+      { legend: "Тайлангийн материал", title: "Тайлангийн жишээ", path: "/services/training/report" },
+    ]
+    for (const { legend, title } of lists) {
+      const list = page.locator("fieldset", { has: page.locator("legend", { hasText: legend }) }).first()
+      await list.getByRole("button", { name: "Шинээр нэмэх" }).click()
+      const doc = list.locator("details").last()
+      await doc.locator('input[id$="-title"]').fill(title)
+      await doc.locator('input[type="file"]').setInputFiles("e2e/fixtures/contract.pdf")
+      await expect(doc.locator('input[id$="-file"]')).toHaveValue(/^\/media\//)
+    }
+    // Зураг PDF талбарт орохгүй
+    const report = page.locator("fieldset", { has: page.locator("legend", { hasText: "Тайлангийн материал" }) }).first()
+    await report.locator('input[type="file"]').last().setInputFiles("e2e/fixtures/photo.png")
+    await expect(report.getByText("Зөвхөн PDF файл оруулна.")).toBeVisible()
+
+    await page.getByRole("button", { name: "Хадгалах" }).click()
+    await expect(page.getByRole("status")).toContainText("Хадгалагдлаа")
+
+    for (const { title, path } of lists) {
+      await page.goto(path)
+      const link = page.getByRole("link", { name: new RegExp(title) })
+      await expect(link).toHaveAttribute("href", /^\/media\//)
+      const response = await page.request.get((await link.getAttribute("href"))!)
+      expect(response.headers()["content-type"]).toBe("application/pdf")
+    }
+
+    await page.goto("/admin/content/services")
+    await page.getByRole("button", { name: "Анхны текст рүү буцаах" }).click()
+    await page.getByRole("button", { name: "Тийм, буцаах" }).click()
+    await expect(page.getByRole("status")).toContainText("Анхны текст")
+  })
+
   test("харилцагчдын жагсаалтад бүртгүүлсэн хэрэглэгч харагдана", async ({ page, browser }) => {
     const phone = `8${Math.floor(1_000_000 + Math.random() * 8_999_999)}`
     const visitor = await browser.newPage()

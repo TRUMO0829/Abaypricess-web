@@ -33,7 +33,7 @@ export function sanitize(def: unknown, input: unknown, path: Path): unknown {
       // Тогтмол урттай: индексээр, дутуу/алдаатай нь null → default хэвээр
       return def.map((item, index) => sanitize(item, input[index], [...path, index]) ?? null)
     }
-    const shape = itemShape(def)
+    const shape = itemShape(def, path)
     return input.slice(0, MAX_ITEMS).flatMap((item: unknown, index): unknown[] => {
       if (typeof shape === "string") return typeof item === "string" ? [item.slice(0, MAX_TEXT)] : []
       if (!isPlainObject(item) || !isPlainObject(shape)) return []
@@ -75,7 +75,7 @@ function mergeValue(def: unknown, ov: unknown, path: Path): unknown {
   if (Array.isArray(def)) {
     if (!Array.isArray(ov)) return def
     if (!isGrowable(path, def)) return def.map((item, index) => mergeValue(item, ov[index], [...path, index]))
-    const shape = itemShape(def)
+    const shape = itemShape(def, path)
     return ov.flatMap((item: unknown, index): unknown[] => {
       if (typeof shape === "string") return typeof item === "string" ? [item] : []
       if (!isPlainObject(item) || !isPlainObject(shape)) return []
