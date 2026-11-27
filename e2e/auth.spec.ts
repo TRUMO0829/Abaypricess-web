@@ -92,6 +92,27 @@ test.describe("нэвтрэх, бүртгүүлэх", () => {
     await expect(page.getByText("Энэ дугаараар бүртгэл үүссэн байна")).toBeVisible()
   })
 
+  test("нэр, компанийн нэр латинаар бичвэл бүртгэхгүй", async ({ page }) => {
+    await page.goto("/register")
+    await field(page, "name").fill("Bat-Erdene")
+    await field(page, "phone").fill(randomPhone())
+    await field(page, "company").fill("Adapt Management LLC")
+    await field(page, "position").fill("Захирал")
+    await field(page, "password").fill("strongpass1")
+    await field(page, "confirmPassword").fill("strongpass1")
+    await page.getByRole("button", { name: "Бүртгүүлэх" }).click()
+    await expect(page.getByText("Нэрээ кирилл үсгээр бичнэ үү")).toBeVisible()
+    await expect(page.getByText(/Компанийн нэрийг кирилл үсгээр/)).toBeVisible()
+    await expect(page).toHaveURL(/\/register/)
+
+    await field(page, "name").fill("Бат-Эрдэнэ")
+    await field(page, "company").fill("«Адапт Менежмент» ХХК")
+    await field(page, "password").fill("strongpass1")
+    await field(page, "confirmPassword").fill("strongpass1")
+    await page.getByRole("button", { name: "Бүртгүүлэх" }).click()
+    await expect(page).toHaveURL(/\/$/)
+  })
+
   test("гаднах хаяг руу redirect хийхгүй", async ({ page }) => {
     await register(page, randomPhone(), "//evil.example.com")
     await expect(page).toHaveURL(/localhost:\d+\/$/)

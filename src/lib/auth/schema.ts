@@ -15,6 +15,11 @@ const phone = z
   .regex(MN_PHONE_REGEX, { error: "Утасны дугаар 8 оронтой байна (ж: 9911 2233)" })
   .transform(normalizePhone)
 
+/** Нэр: зөвхөн кирилл үсэг (Ө, Ү орно), зай, зураас, цэг. */
+export const CYRILLIC_NAME_REGEX = /^[\p{Script=Cyrillic}\s.'’-]+$/u
+/** Компанийн нэр: кирилл үсэг, тоо, түгээмэл тэмдэгт («», "", &, (), №). Латин үсэггүй. */
+export const CYRILLIC_COMPANY_REGEX = /^[\p{Script=Cyrillic}0-9\s.,'’"“”«»&()№-]+$/u
+
 export const PASSWORD_MIN = 4
 /** bcrypt 72 байтаас хойшхийг үл тоодог */
 export const PASSWORD_MAX = 72
@@ -26,13 +31,15 @@ export const registerSchema = z
       .trim()
       .min(1, { error: "Нэрээ оруулна уу" })
       .min(2, { error: "Нэр хэт богино байна" })
-      .max(100, { error: "100 тэмдэгтээс хэтрэхгүй" }),
+      .max(100, { error: "100 тэмдэгтээс хэтрэхгүй" })
+      .regex(CYRILLIC_NAME_REGEX, { error: "Нэрээ кирилл үсгээр бичнэ үү" }),
     company: z
       .string()
       .trim()
       .min(1, { error: "Компанийн нэрээ оруулна уу" })
       .min(2, { error: "Компанийн нэр хэт богино байна" })
-      .max(150, { error: "150 тэмдэгтээс хэтрэхгүй" }),
+      .max(150, { error: "150 тэмдэгтээс хэтрэхгүй" })
+      .regex(CYRILLIC_COMPANY_REGEX, { error: "Компанийн нэрийг кирилл үсгээр бичнэ үү (ж: Адапт Менежмент ХХК)" }),
     position: z
       .string()
       .trim()

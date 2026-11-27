@@ -28,7 +28,7 @@ export const authContent = {
   },
   fields: {
     name: { label: "Нэр", placeholder: "Бат-Эрдэнэ" },
-    company: { label: "Компанийн нэр", placeholder: "Компанийн нэр" },
+    company: { label: "Компанийн нэр", placeholder: "Ж: Адапт Менежмент ХХК" },
     position: { label: "Албан тушаал", placeholder: "Ж: Хүний нөөцийн менежер" },
     phone: { label: "Утасны дугаар", placeholder: "9911 2233" },
     password: { label: "Нууц үг", placeholder: "Дор хаяж 4 тэмдэгт" },
