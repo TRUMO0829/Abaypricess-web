@@ -34,7 +34,7 @@ const KEY_LABELS: Record<string, string> = {
   hours: "Ажлын цаг",
   // хүн
   role: "Албан тушаал",
-  photo: "Зураг (холбоос, ж: /team/bat.jpg эсвэл https://…)",
+  photo: "Зураг",
   experience: "Ажлын туршлага",
   expertise: "Ур чадвар",
   team: "Багийн гишүүд",

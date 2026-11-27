@@ -1,9 +1,8 @@
 import { expect, test, type Page } from "@playwright/test"
 
 // Сервер ADMIN_MOCK=1, ADMIN_DEV_PASSWORD=e2e-admin-pass-аар ажилладаг (playwright.config.ts) — Supabase руу бичихгүй.
-// Агуулгын засвар бүх тестэд нөлөөлөх тул зөвхөн desktop дээр, дараалан ажиллуулж, төгсгөлд нь буцаана.
+// Агуулгын засвар бүх тестэд нөлөөлөх тул тусдаа «admin» project-д (бусад тестийн дараа), дараалан ажиллуулж, төгсгөлд нь буцаана.
 test.describe.configure({ mode: "serial" })
-test.skip(({ isMobile }) => isMobile, "Агуулгын засвар нийтлэг тул нэг project-д л")
 
 const PASSWORD = "e2e-admin-pass"
 
@@ -64,6 +63,41 @@ test.describe("админ", () => {
     await expect(page.getByRole("heading", { name: "Шинэ Зөвлөх" })).toBeVisible()
 
     await page.goto("/admin/content/team")
+    await page.getByRole("button", { name: "Анхны текст рүү буцаах" }).click()
+    await page.getByRole("button", { name: "Тийм, буцаах" }).click()
+    await expect(page.getByRole("status")).toContainText("Анхны текст")
+  })
+
+  test("шинэ сургагч багшид туршлага, ур чадвар, зураг нэмэхэд сайт дээр харагдана", async ({ page }) => {
+    await login(page)
+    await page.goto("/admin/content/services")
+    await page.locator("summary", { hasText: "Business Training Service" }).first().click()
+    const trainers = page.locator("fieldset", { has: page.locator("legend", { hasText: "Сургагч багш нар" }) }).first()
+    await trainers.getByRole("button", { name: "Шинээр нэмэх" }).last().click()
+    const trainer = trainers.locator("details").last()
+    await trainer.locator('input[id$="-name"]').fill("Туршилтын Багш")
+    await trainer.locator('input[id$="-role"]').fill("Сургагч")
+    for (const [legend, text] of [
+      ["Ажлын туршлага", "Ахлах сургагч — 2020 оноос"],
+      ["Ур чадвар", "Төсөл удирдлага"],
+    ]) {
+      const list = trainer.locator("fieldset", { has: page.locator("legend", { hasText: legend }) })
+      await list.getByRole("button", { name: "Мөр нэмэх" }).click()
+      await list.locator("input").first().fill(text)
+    }
+    await trainer.locator('input[type="file"]').setInputFiles("e2e/fixtures/photo.png")
+    await expect(trainer.locator('input[id$="-photo"]')).toHaveValue(/^\/media\//)
+    await page.getByRole("button", { name: "Хадгалах" }).click()
+    await expect(page.getByRole("status")).toContainText("Хадгалагдлаа")
+
+    await page.goto("/services/training/trainers")
+    const card = page.getByRole("listitem").filter({ hasText: "Туршилтын Багш" })
+    await expect(card.getByRole("img", { name: "Туршилтын Багш" })).toHaveAttribute("src", /^\/media\//)
+    await card.getByText("CV харах").click()
+    await expect(card.getByText("Ахлах сургагч — 2020 оноос")).toBeVisible()
+    await expect(card.getByText("Төсөл удирдлага")).toBeVisible()
+
+    await page.goto("/admin/content/services")
     await page.getByRole("button", { name: "Анхны текст рүү буцаах" }).click()
     await page.getByRole("button", { name: "Тийм, буцаах" }).click()
     await expect(page.getByRole("status")).toContainText("Анхны текст")

@@ -1,6 +1,6 @@
 import "server-only"
 
-import { createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto"
+import { createHash, randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto"
 
 /*
  * Админы өгөгдөл: Supabase (`supabase/migrations/*_admin_panel.sql`) эсвэл туршилтын санах ой.
@@ -31,7 +31,16 @@ export interface AdminStore {
   /** `data: null` → анхны (кодын) утга руу буцаана */
   saveContent(token: string, key: string, data: unknown): Promise<void>
   readContent(): Promise<ContentRows>
+  /** Зураг хадгалаад id буцаана (`/media/<id>`) */
+  uploadMedia(token: string, mime: MediaMime, data: Buffer): Promise<string>
+  readMedia(id: string): Promise<{ mime: string; data: Buffer } | null>
 }
+
+export const MEDIA_MIMES = ["image/jpeg", "image/png", "image/webp"] as const
+export type MediaMime = (typeof MEDIA_MIMES)[number]
+export const MEDIA_MAX_BYTES = 2_000_000
+const MEDIA_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+export const isMediaId = (id: string) => MEDIA_ID.test(id)
 
 class AdminStoreError extends Error {}
 
@@ -90,18 +99,30 @@ function supabaseStore(url: string, key: string): AdminStore {
       }
       return rows
     },
+    async uploadMedia(token, mime, data) {
+      const { ok, json, message } = await rpc("admin_upload_media", { p_token: token, p_mime: mime, p_data: data.toString("base64") })
+      if (!ok || typeof json !== "string") throw new AdminStoreError(message || "upload_media")
+      return json
+    },
+    async readMedia(id) {
+      if (!isMediaId(id)) return null
+      const { ok, json } = await rpc("get_media", { p_id: id })
+      const row = ok && Array.isArray(json) ? (json[0] as { mime: string; data: string } | undefined) : undefined
+      return row ? { mime: row.mime, data: Buffer.from(row.data, "base64") } : null
+    },
   }
 }
 
 /* ── Туршилтын сан (dev, e2e). Нууц үг: `ADMIN_DEV_PASSWORD` (тохируулаагүй бол нэвтрэх боломжгүй) ─────── */
 
 const mem = globalThis as typeof globalThis & {
-  __adaptAdmin?: { sessions: Map<string, number>; content: ContentRows }
+  __adaptAdmin?: { sessions: Map<string, number>; content: ContentRows; media: Map<string, { mime: string; data: Buffer }> }
   /** `lib/auth/store.ts`-ийн туршилтын бүртгэлүүд */
   __adaptAccounts?: Map<string, Omit<CustomerAccount, "created_at" | "last_login_at">>
 }
 function memState() {
-  mem.__adaptAdmin ??= { sessions: new Map(), content: {} }
+  mem.__adaptAdmin ??= { sessions: new Map(), content: {}, media: new Map() }
+  mem.__adaptAdmin.media ??= new Map()
   return mem.__adaptAdmin
 }
 const sha = (value: string) => createHash("sha256").update(value).digest()
@@ -146,6 +167,15 @@ const memoryStore: AdminStore = {
   },
   async readContent() {
     return structuredClone(memState().content)
+  },
+  async uploadMedia(token, mime, data) {
+    if (!(await memoryStore.sessionUser(token))) throw new AdminStoreError("unauthorized")
+    const id = randomUUID()
+    memState().media.set(id, { mime, data })
+    return id
+  },
+  async readMedia(id) {
+    return memState().media.get(id) ?? null
   },
 }
 

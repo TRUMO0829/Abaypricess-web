@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test"
 
 const PORT = 3200
+const desktop = { ...devices["Desktop Chrome"], channel: "chrome", viewport: { width: 1280, height: 800 } }
 
 export default defineConfig({
   testDir: "./e2e",
@@ -13,8 +14,10 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"], channel: "chrome", viewport: { width: 1280, height: 800 } } },
-    { name: "mobile", use: { ...devices["Pixel 7"], channel: "chrome", viewport: { width: 375, height: 812 } } },
+    { name: "desktop", testIgnore: /admin\.spec/, use: { ...desktop } },
+    { name: "mobile", testIgnore: /admin\.spec/, use: { ...devices["Pixel 7"], channel: "chrome", viewport: { width: 375, height: 812 } } },
+    // Админы тест сайтын нийтлэг агуулгыг түр өөрчилдөг тул бусад тест дууссаны дараа ажиллана
+    { name: "admin", testMatch: /admin\.spec/, dependencies: ["desktop", "mobile"], use: { ...desktop } },
   ],
   webServer: {
     command: `npm run build && npx next start -p ${PORT}`,

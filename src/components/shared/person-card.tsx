@@ -43,8 +43,8 @@ function PersonCard({ person, id, t }: { person: TeamMember; id: string; t: CvLa
             src={person.photo}
             alt={person.name}
             fill
-            // Админ гаднын холбоос оруулж болох тул зөвхөн дотоод зургийг optimize хийнэ
-            unoptimized={!person.photo.startsWith("/")}
+            // Гаднын холбоос болон админаас оруулсан (аль хэдийн багасгасан) зургийг optimize хийхгүй
+            unoptimized={!person.photo.startsWith("/") || person.photo.startsWith("/media/")}
             sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover"
           />

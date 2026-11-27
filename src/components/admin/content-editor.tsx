@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { ArrowDown, ArrowUp, Check, ChevronRight, Loader2, Plus, RotateCcw, Save, Trash2 } from "lucide-react"
 
+import { PhotoInput } from "@/components/admin/photo-input"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -200,6 +201,7 @@ function Node({ value, path, defaults, onChange, depth }: NodeProps) {
       />
     )
   }
+  if (key === "photo" && typeof value === "string") return <PhotoInput id={id} value={value} onChange={(url) => onChange(path, url)} />
   if (typeof value === "string") return <TextInput id={id} value={value} onChange={(text) => onChange(path, text)} />
   if (typeof value === "boolean") {
     return (

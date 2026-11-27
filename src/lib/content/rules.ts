@@ -72,7 +72,8 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 export function isGrowable(path: Path, sample: unknown[]): boolean {
   const key = pattern(path)
   if (GROWABLE.has(key)) return true
-  return sample.length > 0 && sample.every((item) => typeof item === "string") && !FIXED_STRING_ARRAYS.has(key)
+  // Хоосон жагсаалт (ж: шинэ гишүүний туршлага) нь текстийн жагсаалт — мөр нэмэх боломжтой байх ёстой
+  return sample.every((item) => typeof item === "string") && !FIXED_STRING_ARRAYS.has(key)
 }
 
 const isPerson = (shape: Record<string, unknown>) => "expertise" in shape && "role" in shape

@@ -5,7 +5,7 @@ import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { clearAdminToken, getAdminToken, requireAdmin, setAdminToken } from "@/lib/admin/session"
-import { getAdminStore } from "@/lib/admin/store"
+import { getAdminStore, MEDIA_MAX_BYTES, type MediaMime } from "@/lib/admin/store"
 import { CONTENT_TAG } from "@/lib/content"
 import { defaultContent } from "@/lib/content/defaults"
 import { sanitize } from "@/lib/content/merge"
@@ -96,4 +96,32 @@ export async function resetContentAction(sectionKey: string): Promise<SaveConten
   }
   updateTag(CONTENT_TAG)
   return { ok: true, savedAt: new Date().toISOString() }
+}
+
+export type UploadMediaResult = { ok: true; url: string } | { ok: false; message: string }
+
+/** Файлын эхний байтаар зургийн төрлийг тодорхойлно (браузерын хэлсэн төрөлд итгэхгүй). */
+function sniffImage(bytes: Buffer): MediaMime | null {
+  if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "image/jpeg"
+  if (bytes.length > 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return "image/png"
+  if (bytes.length > 12 && bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP") return "image/webp"
+  return null
+}
+
+/** Багийн гишүүн, сургагч багшийн зураг. Буцаасан `url`-ийг `photo` талбарт хадгална. */
+export async function uploadMediaAction(formData: FormData): Promise<UploadMediaResult> {
+  const { store, token } = await requireAdmin()
+  const file = formData.get("file")
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "Зураг сонгоно уу." }
+  if (file.size > MEDIA_MAX_BYTES) return { ok: false, message: "Зураг 2MB-аас бага байх ёстой." }
+  const bytes = Buffer.from(await file.arrayBuffer())
+  const mime = sniffImage(bytes)
+  if (!mime) return { ok: false, message: "Зөвхөн JPG, PNG, WebP зураг оруулна." }
+  try {
+    const id = await store.uploadMedia(token, mime, bytes)
+    return { ok: true, url: `/media/${id}` }
+  } catch (error) {
+    console.error("[admin] upload", error)
+    return { ok: false, message: "Зураг хадгалж чадсангүй. Supabase-д зургийн migration ажилласан эсэхийг шалгана уу." }
+  }
 }
